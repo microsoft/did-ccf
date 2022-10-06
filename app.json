@@ -1,0 +1,98 @@
+{
+  "endpoints": {
+    "/identifier/resolve/{id}": {
+      "get": {
+        "js_module": "endpoints/identifier/resolve.js",
+        "js_function": "resolve",
+        "forwarding_required": "sometimes",
+        "authn_policies": [],
+        "mode": "readonly",
+        "openapi": {
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "properties": {
+                      "error": {
+                        "description": "Error message",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "error"
+                    ],
+                    "type": "object",
+                    "additionalProperties": false
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "properties": {
+                      "error": {
+                        "description": "Error message",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "error"
+                    ],
+                    "type": "object",
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identifier/create": {
+      "get": {
+        "js_module": "endpoints/identifier/create.js",
+        "js_function": "create",
+        "forwarding_required": "always",
+        "authn_policies": [],
+        "mode": "readwrite",
+        "openapi": {
+          "responses": {
+            "201": {
+              "description": "Created",
+              "content": {
+                "application/json": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
