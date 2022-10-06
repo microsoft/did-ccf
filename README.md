@@ -1,4 +1,8 @@
-# W3C Decentralized Identifier Method Specifiction for the The Confidential Consortium Framework [![Docs](https://img.shields.io/badge/Documentation-Up%20to%20date-green)](https://microsoft.github.io/CCF)
+#W3C DID for Confidential Consortium Framework [![Docs](https://img.shields.io/badge/Documentation-Up%20to%20date-green)](https://microsoft.github.io/CCF)
+
+Repository specifying a [W3C DID-Core](https://www.w3.org/TR/did-core/) method that uses networks built on top of CCF. This repositorty also includes
+a CCF application implementation for generating new  and resolving identifiers.
+
 
 
 ## Learn More
