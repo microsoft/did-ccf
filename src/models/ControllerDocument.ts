@@ -44,14 +44,16 @@ export interface VerificationMethod {
     constructor (public id: string) {
         // Add the @context to the document using
         // the identifier as the @base.
-        Object.assign(this, {
-            "@context": [
+        Object.defineProperty(
+            this, 
+            '@context',
+            [
                 "https://www.w3.org/ns/did/v1",
                 {
                     "@base": id
                 }
             ]
-        });
+        );
     }
 
     /**
