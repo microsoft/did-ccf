@@ -1,6 +1,6 @@
 {
   "endpoints": {
-    "/identifier/resolve/{id}": {
+    "/identifiers/{id}/resolve": {
       "get": {
         "js_module": "endpoints/identifier/resolve.js",
         "js_function": "resolve",
@@ -72,16 +72,120 @@
         }
       }
     },
-    "/identifier/create": {
-      "get": {
+    "/identifiers/create": {
+      "put": {
         "js_module": "endpoints/identifier/create.js",
         "js_function": "create",
         "forwarding_required": "always",
-        "authn_policies": [],
+        "authn_policies": ["member_signature"],
         "mode": "readwrite",
         "openapi": {
           "responses": {
             "201": {
+              "description": "Created",
+              "content": {
+                "application/json": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identifiers/{id}/keys/list": {
+      "get": {
+        "js_module": "endpoints/identifier/keys/list.js",
+        "js_function": "list",
+        "forwarding_required": "always",
+        "authn_policies": ["member_signature"],
+        "mode": "readonly",
+        "openapi": {
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identifiers/{id}/keys/roll": {
+      "patch": {
+        "js_module": "endpoints/identifier/keys/roll.js",
+        "js_function": "roll",
+        "forwarding_required": "always",
+        "authn_policies": ["member_signature"],
+        "mode": "readwrite",
+        "openapi": {
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Created",
+              "content": {
+                "application/json": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identifiers/{id}/keys/{kid}/revoke": {
+      "patch": {
+        "js_module": "endpoints/identifier/keys/revoke.js",
+        "js_function": "revoke",
+        "forwarding_required": "always",
+        "authn_policies": ["member_signature"],
+        "mode": "readwrite",
+        "openapi": {
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "kid",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
               "description": "Created",
               "content": {
                 "application/json": {

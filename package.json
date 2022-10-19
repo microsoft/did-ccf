@@ -2,8 +2,7 @@
   "private": true,
   "scripts": {
     "build": "del-cli -f dist/ && rollup --config && copyfiles app.json dist/ && node build_bundle.js dist/",
-    "propose": "node build_proposal.js utils",
-    "test": "node --version"
+    "propose": "node build_proposal.js utils"
   },
   "type": "module",
   "engines": {
