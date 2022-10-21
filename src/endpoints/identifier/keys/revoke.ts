@@ -1,7 +1,7 @@
 import * as ccfapp from '@microsoft/ccf-app';
+import { KeyState } from '../../../models/KeyState';
 import MemberIdentifierKeys from '../../../models/MemberIdentifierKeys';
-import { KeyState } from '../../../models/KeyPair';
-import { VerificationMethod, VerificationMethodRelationships } from '../../../all';
+import { VerificationMethodRelationship } from '../../../models/VerificationMethodRelationship';
 
 /**
  * Revokes the specified key pair associated with the controller
@@ -51,14 +51,14 @@ export function revoke (request: ccfapp.Request): ccfapp.Response {
     };
   }
 
-  matchedKey.state = KeyState.revoked;
+  matchedKey.state = KeyState.Revoked;
   delete matchedKey.privateKey;
 
   // Remove the method from the verification methods array
   memberIdentifierKeys.controllerDocument.verificationMethods = memberIdentifierKeys.controllerDocument.verificationMethods.filter(verificationMethod => verificationMethod.id !== keyIdentifier);
 
   // Now remove from any references from relationships
-  Object.keys(VerificationMethodRelationships).forEach(relationship => {
+  Object.keys(VerificationMethodRelationship).forEach(relationship => {
     if (memberIdentifierKeys.controllerDocument.hasOwnProperty(relationship)){
       memberIdentifierKeys.controllerDocument[relationship] = memberIdentifierKeys.controllerDocument[relationship].filter(reference => reference !== keyIdentifier);
     }

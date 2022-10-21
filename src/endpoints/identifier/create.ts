@@ -4,9 +4,12 @@ import { Base64 } from 'js-base64';
 import ControllerDocument from '../../models/ControllerDocument';
 import MemberIdentifierKeys from '../../models/MemberIdentifierKeys';
 import { KeyPair } from '../../models/KeyPair';
-import { VerificationMethodRelationships } from '../../models/VerificationMethodRelationships';
+import { VerificationMethodRelationship } from '../../models/VerificationMethodRelationship';
 import { VerificationMethodType } from '../../models/VerificationMethodType';
 import { MemberSignatureAuthnIdentity } from '@microsoft/ccf-app';
+import { KeyAlgorithm } from '../../models/KeyAlgorithm';
+import { EcdsaCurve } from '../../models/EcdsaCurve';
+import { QueryStringParser } from '../../models/QueryStringParser';
 
 /**
  * Creates a new decentralized identifier
@@ -18,9 +21,14 @@ export function create (request: ccfapp.Request): ccfapp.Response {
   // of a network member. Members are not limited in the number
   // of identifiers they can create.
   const memberId = <MemberSignatureAuthnIdentity>request.caller;
-  
-  // Generate a new RSA key pair
-  const keyPair: KeyPair = KeyPair.newRsaKeyPair();
+  const queryParams = new QueryStringParser(request.query);
+
+  // Get the optional parameters from the request
+  const algorithm: KeyAlgorithm = <KeyAlgorithm>queryParams['alg'] || KeyAlgorithm.Ecdsa;
+  const curve: EcdsaCurve = <EcdsaCurve>queryParams['curve'] || EcdsaCurve.Secp256r1;
+
+  // Generate a new key pair
+  const keyPair: KeyPair = algorithm === KeyAlgorithm.Rsa ? KeyPair.newRsaKeyPair() : KeyPair.newEcdsaKeyPair(curve);
 
   // Get the digest of the public key to use as the identifier
   const publicKeyDigestArray = crypto.digest('SHA-256', ccfapp.string.encode(keyPair.publicKey));
@@ -39,7 +47,7 @@ export function create (request: ccfapp.Request): ccfapp.Response {
     controller: identifier,
     type: VerificationMethodType.JsonWebKey2020,
     publicKeyJwk: keyPair.publicKey,
-  }, [VerificationMethodRelationships.authentication]);
+  }, [VerificationMethodRelationship.Authentication]);
 
   // Store the new identifier
   identifierStore.set(publicKeyDigestBase64Url, {memberId: memberId.id,  controllerDocument: controllerDocument, keyPairs: [ keyPair ]});

@@ -1,35 +1,10 @@
 import * as crypto from '@microsoft/ccf-app/crypto';
+import { EcdsaCurve } from './EcdsaCurve';
+import { KeyAlgorithm } from './KeyAlgorithm';
+import { KeyState } from './KeyState';
 
 const ID_CHARACTERS: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const ID_LENGTH: number = 12;
-
-/**
- * Enumeration defining the
- * {@link KeyPair} states.
- */
-export enum KeyState {
-    /**
-     * Indicates that the key this is the
-     * current signing key for the controller.
-     */
-    current = 'current',
-
-    /**
-     * Indicates that the key has been revoked
-     * and is not longer used for signing. Any
-     * material signed with this is no longer
-     * valid.
-     */
-    revoked = 'revoked',
-
-    /**
-     * Indicates that the key has been rolled
-     * an the private key is no longer used for signing. 
-     * However, any material signed with the key 
-     * can still be validated using the public key.
-     */
-    historical = 'historical',
-}
 
 /**
  * Base implementation for holding key pairs.
@@ -38,33 +13,45 @@ export class KeyPair implements KeyPair {
     /**
      * The id for the key pair.
      */
-     id: string;
+    id: string;
 
-     /**
-      * Members public key.
-      */
-     publicKey: string;
+    /**
+     * The algorithm used for the key.
+     */
+    algorithm: KeyAlgorithm;
+
+    /**
+     * The curve used by the Ecdsa key.
+     */
+    curve?: EcdsaCurve;
+
+    /**
+     * Members public key.
+     */
+    publicKey: string;
  
-     /**
-      * [Optional] Members private key.
-      */
-     privateKey?: string;
+    /**
+     * [Optional] Members private key.
+     */
+    privateKey?: string;
  
-     /**
-      * The {@link KeyState} of the key pair.
-      */
-     state: KeyState;
+    /**
+     * The {@link KeyState} of the key pair.
+     */
+    state: KeyState;
 
     /**
      * Constructs a new instance of the {@link KeyPair} class.
+     * @param {KeyAlgorithm} algorithm of the key pair. 
      * @param {string} publicKey of the key pair.
      * @param {string} privateKey of the key pair.
      */
-    constructor (publicKey: string, privateKey: string) {   
+    constructor (algorithm: KeyAlgorithm, publicKey: string, privateKey: string) {   
         this.id = this.newId(ID_LENGTH);
+        this.algorithm = algorithm;
         this.publicKey = publicKey;
         this.privateKey = privateKey;
-        this.state = KeyState.current;
+        this.state = KeyState.Current;
     }
 
     /**
@@ -93,6 +80,18 @@ export class KeyPair implements KeyPair {
      */
     static newRsaKeyPair(size: number = 4096) : KeyPair {
         const { publicKey, privateKey } = crypto.generateRsaKeyPair(size);
-        return new KeyPair(publicKey, privateKey);
+        return new KeyPair(KeyAlgorithm.Rsa, publicKey, privateKey);
+    }
+
+    /**
+     * Returns a new instance of an ECDSA key pair.
+     * @param {EcdsaCurve} curve of the key pair to generate. Default is {@link EcdsaCurve.Secp256r1}.
+     * @returns A new ECDSA key pair.
+     */
+    static newEcdsaKeyPair(curve: EcdsaCurve = EcdsaCurve.Secp256r1) : KeyPair {
+        const { publicKey, privateKey } = crypto.generateEcdsaKeyPair(curve.toString());
+        const keyPair = new KeyPair(KeyAlgorithm.Ecdsa, publicKey, privateKey);
+        keyPair.curve = curve;
+        return keyPair;
     }
 }

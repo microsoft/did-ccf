@@ -2,29 +2,29 @@
  * Enumeration representing {@link https://www.w3.org/TR/did-core/#verification-relationships}
  * supported by the CCF app.
  */
-export enum VerificationMethodRelationships {
+export enum VerificationMethodRelationship {
     /**
      * Enum value for {@link https://www.w3.org/TR/did-core/#authentication}.
      */
-    authentication = 'authentication',
+    Authentication = 'authentication',
 
     /**
      * Enum value for {@link https://www.w3.org/TR/did-core/#assertion}.
     */
-    assertionMethod = 'assertionMethod',
+    AssertionMethod = 'assertionMethod',
 
     /**
      * Enum value for {@link https://www.w3.org/TR/did-core/#key-agreement}.
      */
-    keyAgreement = 'keyAgreement',
+    KeyAgreement = 'keyAgreement',
 
     /**
      * Enum value for {@link https://www.w3.org/TR/did-core/#capability-invocation}.
      */
-    capabilityInvocation = 'capabilityInvocation',
+    CapabilityInvocation = 'capabilityInvocation',
 
     /**
      * Enum value for {@link https://www.w3.org/TR/did-core/#capability-delegation}.
      */
-    capabilityDelegation = 'capabilityDelegation',
+    CapabilityDelegation = 'capabilityDelegation',
 }
