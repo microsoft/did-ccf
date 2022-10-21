@@ -80,6 +80,33 @@
         "authn_policies": ["member_signature"],
         "mode": "readwrite",
         "openapi": {
+          "parameters": [
+            {
+              "name": "alg",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "rsa",
+                  "ecdsa"
+                ]
+              }
+            },
+            {
+              "name": "curve",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "secp256r1",
+                  "secp256k1",
+                  "secp384r1"
+                ]
+              }
+            }
+          ],
           "responses": {
             "201": {
               "description": "Created",
@@ -141,6 +168,31 @@
               "required": true,
               "schema": {
                 "type": "string"
+              }
+            },
+            {
+              "name": "alg",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "rsa",
+                  "ecdsa"
+                ]
+              }
+            },
+            {
+              "name": "curve",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "secp256r1",
+                  "secp256k1",
+                  "secp384r1"
+                ]
               }
             }
           ],

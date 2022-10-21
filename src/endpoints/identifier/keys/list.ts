@@ -1,5 +1,5 @@
 import * as ccfapp from '@microsoft/ccf-app';
-import { KeyPair } from '../../../all';
+import { KeyAlgorithm } from '../../../models/KeyAlgorithm';
 import MemberIdentifierKeys from '../../../models/MemberIdentifierKeys';
 
 /**
@@ -42,6 +42,10 @@ export function list (request: ccfapp.Request): ccfapp.Response {
       const key = {};
       key['id'] = keyPair.id;
       key['state'] = keyPair.state;
+      key['algorithm'] = keyPair.algorithm;
+      if (keyPair.algorithm === KeyAlgorithm.Ecdsa) {
+        key['curve'] = keyPair.curve;
+      }
       key['publicKey'] = keyPair.publicKey;
 
       return key;

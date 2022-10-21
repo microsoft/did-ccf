@@ -1,14 +1,19 @@
 import * as ccfapp from '@microsoft/ccf-app';
+import { MemberSignatureAuthnIdentity } from '@microsoft/ccf-app';
 import MemberIdentifierKeys from '../../../models/MemberIdentifierKeys';
-import { KeyPair, KeyState } from '../../../models/KeyPair';
-import { VerificationMethodRelationships } from '../../../models/VerificationMethodRelationships';
+import { KeyPair } from '../../../models/KeyPair';
+import { KeyState } from '../../../models/KeyState';
+import { VerificationMethodRelationship } from '../../../models/VerificationMethodRelationship';
 import { VerificationMethodType } from '../../../models/VerificationMethodType';
 import ControllerDocument from '../../../models/ControllerDocument';
-import { MemberSignatureAuthnIdentity } from '@microsoft/ccf-app';
+import { QueryStringParser } from '../../../models/QueryStringParser';
+import { KeyAlgorithm } from '../../../models/KeyAlgorithm';
+import { EcdsaCurve } from '../../../models/EcdsaCurve';
 
 /**
  * Rolls the current key pair associated with the controller
- * identifier.
+ * identifier using the existing key algorihtm as the
+ * algorithm.
  * @param {ccfapp.Request} request passed to the API.
  */
 export function roll (request: ccfapp.Request): ccfapp.Response {
@@ -18,7 +23,7 @@ export function roll (request: ccfapp.Request): ccfapp.Response {
   const memberId = <MemberSignatureAuthnIdentity>request.caller;
   
   const controllerIdentifier: string = request.params.id;
-  
+
   // Check an identifier has been provided and
   // if not return 400 Bad Request
   if (!controllerIdentifier) {
@@ -54,28 +59,40 @@ export function roll (request: ccfapp.Request): ccfapp.Response {
     };
   }
 
-  // Create a new key for the controller
-  const newKeys = KeyPair.newRsaKeyPair();
-
   // Get the current key from the members keys then
-  // 1. Update the state to historical. 
-  // 2. Remove the private key
-  const currentKeys = memberIdentifierKeys.keyPairs.find(keys => keys.state === KeyState.current);
-  currentKeys.state = KeyState.historical;
-  delete currentKeys.privateKey;
+  // 1. Get the current key, check if the same key type is being generated as part of the roll.
+  // 2. Generate the new key.
+  // 1. Update the current key state to historical. 
+  // 2. Remove the current key's private key.
+  const currentKey = memberIdentifierKeys.keyPairs.find(key => key.state === KeyState.Current);
+  
+  // We have macthed an identifier, so let's parse the
+  // query string to see if any alg and curve params
+  // have been specified. If not just use the properties
+  // of the existing key.
+  const queryParams = new QueryStringParser(request.query);
+  const algorithm: KeyAlgorithm = <KeyAlgorithm>queryParams['alg'] || currentKey.algorithm;
+  const curve: EcdsaCurve = <EcdsaCurve>queryParams['curve'] || currentKey?.curve;
+
+  // Now generate the new key
+  const newKey: KeyPair = algorithm === KeyAlgorithm.Rsa ? KeyPair.newRsaKeyPair() : KeyPair.newEcdsaKeyPair(curve);
+
+  // Update the current key state and delete private key
+  currentKey.state = KeyState.Historical;
+  delete currentKey.privateKey;
 
   // Now add the new keys to the member
-  memberIdentifierKeys.keyPairs.push(newKeys);
+  memberIdentifierKeys.keyPairs.push(newKey);
 
   // Add the new verification method to the controller document
   // and then update the store
   const controllerDocument = Object.setPrototypeOf(memberIdentifierKeys.controllerDocument, ControllerDocument.prototype);
   controllerDocument.addVerificationMethod({
-      id: newKeys.id,
+      id: newKey.id,
       controller: memberIdentifierKeys.controllerDocument.id,
       type: VerificationMethodType.JsonWebKey2020,
-      publicKeyJwk: newKeys.publicKey,
-    }, [VerificationMethodRelationships.authentication]);
+      publicKeyJwk: newKey.publicKey,
+    }, [VerificationMethodRelationship.Authentication]);
   
   // Store the new identifier
   identifierStore.set(controllerIdentifier, memberIdentifierKeys);

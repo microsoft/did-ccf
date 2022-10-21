@@ -1,4 +1,4 @@
-import { VerificationMethodRelationships } from './VerificationMethodRelationships';
+import { VerificationMethodRelationship } from './VerificationMethodRelationship';
 import { VerificationMethodType } from './VerificationMethodType';
 
 /**
@@ -31,7 +31,7 @@ export interface VerificationMethod {
 /**
  * Model for representing a {@link https://www.w3.org/TR/did-core/} controller document.
  */
- export default class ControllerDocument {
+export default class ControllerDocument {
     /**
      * Array of {@link VerificationMethod}.
      */
@@ -60,10 +60,10 @@ export interface VerificationMethod {
      * Adds a verification method to the document and adds a entry for the method in the optionally specified
      * relationship.
      * @param {VerificationMethod} verificationMethod - to add to the instance.
-     * @param {Array<VerificationMethodRelationships>}[optional] relationships - for defining the relationship between a DID subject and the {@link VerificationMethod}.
+     * @param {Array<VerificationMethodRelationship>}[optional] relationships - for defining the relationship between a DID subject and the {@link VerificationMethod}.
      * @returns {void}.
      */
-    public addVerificationMethod (verificationMethod: VerificationMethod, relationships?: Array<VerificationMethodRelationships>): void {
+    public addVerificationMethod (verificationMethod: VerificationMethod, relationships?: Array<VerificationMethodRelationship>): void {
 
         // If the method does not specify a controller
         // default to the document id.
