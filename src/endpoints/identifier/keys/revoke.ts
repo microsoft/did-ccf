@@ -57,8 +57,9 @@ export function revoke (request: ccfapp.Request): ccfapp.Response {
   // Remove the method from the verification methods array
   memberIdentifierKeys.controllerDocument.verificationMethods = memberIdentifierKeys.controllerDocument.verificationMethods.filter(verificationMethod => verificationMethod.id !== keyIdentifier);
 
-  // Now remove from any references from relationships
-  Object.keys(VerificationMethodRelationship).forEach(relationship => {
+  // Now remove from any references from relationships. Use the 
+  // enum values since the document relationships begin lower case.
+  Object.values(VerificationMethodRelationship).forEach(relationship => {
     if (memberIdentifierKeys.controllerDocument.hasOwnProperty(relationship)){
       memberIdentifierKeys.controllerDocument[relationship] = memberIdentifierKeys.controllerDocument[relationship].filter(reference => reference !== keyIdentifier);
     }
@@ -70,6 +71,6 @@ export function revoke (request: ccfapp.Request): ccfapp.Response {
   // Return 201 and the controller document representing the updated controller document.
   return {
     statusCode: 200,
-    body: memberIdentifierKeys.controllerDocument,
+    body: memberIdentifierKeys.controllerDocument
   };
 }
