@@ -12,3 +12,4 @@ export * from './endpoints/identifier/resolve';
 export * from './endpoints/identifier/keys/list';
 export * from './endpoints/identifier/keys/revoke';
 export * from './endpoints/identifier/keys/roll';
+export * from './endpoints/identifier/keys/exportPrivate';

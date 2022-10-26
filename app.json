@@ -238,7 +238,47 @@
           ],
           "responses": {
             "200": {
-              "description": "Created",
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identifiers/{id}/keys/{kid}/export": {
+      "get": {
+        "js_module": "endpoints/identifier/keys/exportPrivate.js",
+        "js_function": "exportPrivate",
+        "forwarding_required": "always",
+        "authn_policies": ["member_signature"],
+        "mode": "readonly",
+        "openapi": {
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "kid",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
               "content": {
                 "application/json": {
                   "type": "object",
