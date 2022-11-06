@@ -11,4 +11,9 @@
      * ECDSA Algorithm.
      */
     Ecdsa = 'ecdsa',
+
+    /**
+     * EDDSA Algorithm.
+     */
+    Eddsa = 'eddsa',
 }

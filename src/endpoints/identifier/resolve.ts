@@ -29,6 +29,7 @@ export function resolve (request: ccfapp.Request): ccfapp.Response<any> {
   }
 
   return {
+    statusCode: 200,
     body: memberIdentifierKeys.controllerDocument
   };
 }

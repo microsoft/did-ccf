@@ -9,6 +9,8 @@ import ControllerDocument from '../../../models/ControllerDocument';
 import { QueryStringParser } from '../../../models/QueryStringParser';
 import { KeyAlgorithm } from '../../../models/KeyAlgorithm';
 import { EcdsaCurve } from '../../../models/EcdsaCurve';
+import { EddsaCurve } from '../../../models/EddsaCurve';
+import { KeyPairCreator } from '../../../models/KeyPairCreator';
 
 /**
  * Rolls the current key pair associated with the controller
@@ -16,12 +18,12 @@ import { EcdsaCurve } from '../../../models/EcdsaCurve';
  * algorithm.
  * @param {ccfapp.Request} request passed to the API.
  */
-export function roll (request: ccfapp.Request): ccfapp.Response {
+export function roll(request: ccfapp.Request): ccfapp.Response {
   // Decentralized Identifiers (DIDs) are created in the scope
   // of a network member. Only the member associated with the
   // identifier can initiate a key roll.
   const memberId = <MemberSignatureAuthnIdentity>request.caller;
-  
+
   const controllerIdentifier: string = request.params.id;
 
   // Check an identifier has been provided and
@@ -37,7 +39,7 @@ export function roll (request: ccfapp.Request): ccfapp.Response {
 
   // Try read the identifier from the store
   const identifierStore = ccfapp.typedKv('member_identifier_store', ccfapp.string, ccfapp.json<MemberIdentifierKeys>());
-  const memberIdentifierKeys: MemberIdentifierKeys =  <MemberIdentifierKeys>identifierStore.get(controllerIdentifier);
+  const memberIdentifierKeys: MemberIdentifierKeys = <MemberIdentifierKeys>identifierStore.get(controllerIdentifier);
 
   if (!memberIdentifierKeys) {
     return {
@@ -65,17 +67,18 @@ export function roll (request: ccfapp.Request): ccfapp.Response {
   // 1. Update the current key state to historical. 
   // 2. Remove the current key's private key.
   const currentKey = memberIdentifierKeys.keyPairs.find(key => key.state === KeyState.Current);
-  
+
   // We have macthed an identifier, so let's parse the
   // query string to see if any alg and curve params
   // have been specified. If not just use the properties
   // of the existing key.
   const queryParams = new QueryStringParser(request.query);
   const algorithm: KeyAlgorithm = <KeyAlgorithm>queryParams['alg'] || currentKey.algorithm;
-  const curve: EcdsaCurve = <EcdsaCurve>queryParams['curve'] || currentKey?.curve;
+  const size: number = Number.parseInt(queryParams['size']) || currentKey.size;
+  const curve: EcdsaCurve | EddsaCurve = <EcdsaCurve>queryParams['curve'] || currentKey?.curve;
 
   // Now generate the new key
-  const newKey: KeyPair = algorithm === KeyAlgorithm.Rsa ? KeyPair.newRsaKeyPair() : KeyPair.newEcdsaKeyPair(curve);
+  const newKey: KeyPair = KeyPairCreator.createKey(algorithm, size, curve);
 
   // Update the current key state and delete private key
   currentKey.state = KeyState.Historical;
@@ -88,15 +91,15 @@ export function roll (request: ccfapp.Request): ccfapp.Response {
   // and then update the store
   const controllerDocument = Object.setPrototypeOf(memberIdentifierKeys.controllerDocument, ControllerDocument.prototype);
   controllerDocument.addVerificationMethod({
-      id: newKey.id,
-      controller: memberIdentifierKeys.controllerDocument.id,
-      type: VerificationMethodType.JsonWebKey2020,
-      publicKeyJwk: newKey.publicKey,
-    }, [VerificationMethodRelationship.Authentication]);
-  
+    id: newKey.id,
+    controller: memberIdentifierKeys.controllerDocument.id,
+    type: VerificationMethodType.JsonWebKey2020,
+    publicKeyJwk: newKey.asJwk(false),
+  }, [VerificationMethodRelationship.Authentication]);
+
   // Store the new identifier
   identifierStore.set(controllerIdentifier, memberIdentifierKeys);
-  
+
   // Return 201 and the controller document representing the updated controller document.
   return {
     statusCode: 201,

@@ -10,6 +10,7 @@ import { MemberSignatureAuthnIdentity } from '@microsoft/ccf-app';
 import { KeyAlgorithm } from '../../models/KeyAlgorithm';
 import { EcdsaCurve } from '../../models/EcdsaCurve';
 import { QueryStringParser } from '../../models/QueryStringParser';
+import { KeyPairCreator } from '../../models/KeyPairCreator';
 
 /**
  * Creates a new decentralized identifier
@@ -24,11 +25,12 @@ export function create (request: ccfapp.Request): ccfapp.Response {
   const queryParams = new QueryStringParser(request.query);
 
   // Get the optional parameters from the request
-  const algorithm: KeyAlgorithm = <KeyAlgorithm>queryParams['alg'] || KeyAlgorithm.Ecdsa;
+  const algorithm: KeyAlgorithm = <KeyAlgorithm>queryParams['alg'] || KeyAlgorithm.Eddsa;
+  const size: number = Number.parseInt(queryParams['size'] || '4096');
   const curve: EcdsaCurve = <EcdsaCurve>queryParams['curve'] || EcdsaCurve.Secp256r1;
 
   // Generate a new key pair
-  const keyPair: KeyPair = algorithm === KeyAlgorithm.Rsa ? KeyPair.newRsaKeyPair() : KeyPair.newEcdsaKeyPair(curve);
+  const keyPair: KeyPair = KeyPairCreator.createKey(algorithm, size, curve);
 
   // Get the digest of the public key to use as the identifier
   const publicKeyDigestArray = crypto.digest('SHA-256', ccfapp.string.encode(keyPair.publicKey));
@@ -46,7 +48,7 @@ export function create (request: ccfapp.Request): ccfapp.Response {
     id: keyPair.id,
     controller: identifier,
     type: VerificationMethodType.JsonWebKey2020,
-    publicKeyJwk: keyPair.publicKey,
+    publicKeyJwk: keyPair.asJwk(false),
   }, [VerificationMethodRelationship.Authentication]);
 
   // Store the new identifier

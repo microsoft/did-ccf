@@ -4,8 +4,80 @@
       "get": {
         "js_module": "endpoints/identifier/resolve.js",
         "js_function": "resolve",
-        "forwarding_required": "sometimes",
+        "forwarding_required": "always",
         "authn_policies": [],
+        "mode": "readonly",
+        "openapi": {
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "properties": {
+                      "error": {
+                        "description": "Error message",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "error"
+                    ],
+                    "type": "object",
+                    "additionalProperties": false
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "properties": {
+                      "error": {
+                        "description": "Error message",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "error"
+                    ],
+                    "type": "object",
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identifiers/{id}/sign": {
+      "post": {
+        "js_module": "endpoints/identifier/sign.js",
+        "js_function": "sign",
+        "forwarding_required": "always",
+        "authn_policies": ["member_signature"],
         "mode": "readonly",
         "openapi": {
           "parameters": [
@@ -89,8 +161,17 @@
                 "type": "string",
                 "enum": [
                   "rsa",
-                  "ecdsa"
+                  "ecdsa",
+                  "eddsa"
                 ]
+              }
+            },
+            {
+              "name": "size",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number"
               }
             },
             {
@@ -102,7 +183,8 @@
                 "enum": [
                   "secp256r1",
                   "secp256k1",
-                  "secp384r1"
+                  "secp384r1",
+                  "curve25519"
                 ]
               }
             }
@@ -178,8 +260,17 @@
                 "type": "string",
                 "enum": [
                   "rsa",
-                  "ecdsa"
+                  "ecdsa",
+                  "eddsa"
                 ]
+              }
+            },
+            {
+              "name": "size",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number"
               }
             },
             {
@@ -191,7 +282,8 @@
                 "enum": [
                   "secp256r1",
                   "secp256k1",
-                  "secp384r1"
+                  "secp384r1",
+                  "curve25519"
                 ]
               }
             }
