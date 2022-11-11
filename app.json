@@ -145,7 +145,7 @@
       }
     },
     "/identifiers/create": {
-      "put": {
+      "post": {
         "js_module": "endpoints/identifier/create.js",
         "js_function": "create",
         "forwarding_required": "always",
