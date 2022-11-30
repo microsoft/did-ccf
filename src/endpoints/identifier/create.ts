@@ -29,6 +29,8 @@ export function create (request: ccfapp.Request): ccfapp.Response {
   const size: number = Number.parseInt(queryParams['size'] || '4096');
   const curve: EcdsaCurve = <EcdsaCurve>queryParams['curve'] || EcdsaCurve.Secp256r1;
 
+  console.log(`Creating identifier for member '${memberId}' with algorithm '${algorithm}' and curve '${curve}'`);
+
   // Generate a new key pair
   const keyPair: KeyPair = KeyPairCreator.createKey(algorithm, size, curve);
 
@@ -53,6 +55,8 @@ export function create (request: ccfapp.Request): ccfapp.Response {
 
   // Store the new identifier
   identifierStore.set(publicKeyDigestBase64Url, {memberId: memberId.id,  controllerDocument: controllerDocument, keyPairs: [ keyPair ]});
+
+  console.log(`Identifier '${identifier}' created for member '${memberId}'.`);
 
   // Return 201 and the controller document representing the newly created identifier.
   return {

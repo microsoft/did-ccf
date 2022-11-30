@@ -1,11 +1,9 @@
 import { JsonWebKey } from '@microsoft/ccf-app/global';
 import { EcdsaCurve } from './EcdsaCurve';
 import { EddsaCurve } from './EddsaCurve';
+import { Identifier } from './Identifier';
 import { KeyAlgorithm } from './KeyAlgorithm';
 import { KeyState } from './KeyState';
-
-const ID_CHARACTERS: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-const ID_LENGTH: number = 12;
 
 /**
  * Base implementation for holding key pairs.
@@ -54,7 +52,7 @@ export abstract class KeyPair implements KeyPair {
      * @param {string} privateKey of the key pair.
      */
     constructor(algorithm: KeyAlgorithm, publicKey: string, privateKey: string) {
-        this.id = this.newId(ID_LENGTH);
+        this.id = Identifier.generate();
         this.algorithm = algorithm;
         this.publicKey = publicKey;
         this.privateKey = privateKey;
@@ -67,24 +65,4 @@ export abstract class KeyPair implements KeyPair {
      * include the private key.
      */
     abstract asJwk(privateKey: boolean): JsonWebKey;
-
-    /**
-     * Creates a new random character ID for the keypair.
-     * @param {number} length of the ID.
-     * @returns {string} of twelve random characters.
-     * @description First approach tried using UNIX epoch time 
-     * converted to a string as the identifier, but
-     * Date() is not supported by a CCF enclave. Nor are UUIDs since
-     * these are date derived.
-     */
-    private newId(length): string {
-        const charactersLength = ID_CHARACTERS.length;
-        let id = '';
-
-        for (var i = 0; i < length; i++) {
-            id += ID_CHARACTERS.charAt(Math.floor(Math.random() * charactersLength));
-        }
-
-        return id;
-    }
 }

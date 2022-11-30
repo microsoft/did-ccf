@@ -5,6 +5,7 @@ export * from './models/KeyPair';
 export * from './models/RsaKeyPair';
 export * from './models/EddsaKeyPair';
 export * from './models/EcdsaKeyPair';
+export * from './models/Identifier';
 export * from './models/KeyPairCreator';
 export * from './models/KeyState';
 export * from './models/KeyAlgorithm';

@@ -17,14 +17,24 @@ export class KeyPairCreator {
     * @param {EcdsaCurve | EddsaCurve} [curve] for the key if algorithm type is {@link KeyAlgorithm.EcdsaCurve} or {@link KeyAlgorithm.EddsaCurve}.
     */
     static createKey(algorithm: KeyAlgorithm, size?: number, curve?: EcdsaCurve | EddsaCurve): KeyPair {
-
+       
+        let keyPair: KeyPair;
         switch (algorithm) {
             case KeyAlgorithm.Rsa:
-                return new RsaKeyPair(size);
+                keyPair = new RsaKeyPair(size);
+                console.log(`RsaKeyPair with key size '${size}' created.`);
+                break;
             case KeyAlgorithm.Ecdsa:
-                return new EcdsaKeyPair(<EcdsaCurve>curve);
+                
+                keyPair = new EcdsaKeyPair(<EcdsaCurve>curve);
+                console.log(`EcdsaKeyPair with curve '${curve}' created.`);
+                break;
             case KeyAlgorithm.Eddsa:
-                return new EddsaKeyPair();
+                keyPair = new EddsaKeyPair();
+                console.log(`EddsaKeyPair with curve 'Curve25519' created.`);
+                break;
         }
+
+        return keyPair;
     }
 }
