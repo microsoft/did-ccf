@@ -4,11 +4,14 @@
       "target": "ES2020",
       "module": "ES2020",
       "moduleResolution": "node",
+      "esModuleInterop": true, 
       "allowSyntheticDefaultImports": true,
       "noImplicitAny": false,
       "removeComments": true,
       "preserveConstEnums": true,
       "sourceMap": false
     },
-    "include": ["src/**/*"]
+    "include": [
+      "src/**/*.ts",
+      "tests/unit/**/*.js" ]
 }

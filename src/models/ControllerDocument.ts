@@ -32,6 +32,12 @@ export interface VerificationMethod {
  * Model for representing a {@link https://www.w3.org/TR/did-core/} controller document.
  */
 export default class ControllerDocument {
+
+    /**
+     * Context for the document.
+     */
+    '@context': (string | any);
+
     /**
      * Array of {@link VerificationMethod}.
      */
@@ -44,16 +50,12 @@ export default class ControllerDocument {
     constructor (public id: string) {
         // Add the @context to the document using
         // the identifier as the @base.
-        Object.defineProperty(
-            this, 
-            '@context',
-            [
-                "https://www.w3.org/ns/did/v1",
-                {
-                    "@base": id
-                }
-            ]
-        );
+        this['@context'] =  [
+            "https://www.w3.org/ns/did/v1",
+            {
+                "@base": id
+            }
+        ]
     }
 
     /**
