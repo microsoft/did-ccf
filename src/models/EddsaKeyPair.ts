@@ -25,7 +25,7 @@ export class EddsaKeyPair extends KeyPair {
      */
     public asJwk(privateKey: boolean = false): JsonWebKey {
         return privateKey ? 
-            crypto.pemToJwk(this.privateKey, this.id) : 
-            crypto.pubPemToJwk(this.publicKey, this.id);
+            crypto.eddsaPemToJwk(this.privateKey, this.id) : 
+            crypto.pubEddsaPemToJwk(this.publicKey, this.id);
     }
 }
