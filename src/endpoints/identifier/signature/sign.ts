@@ -7,7 +7,7 @@ import MemberIdentifierKeys from '../../../models/MemberIdentifierKeys';
 
 export function sign(request: ccfapp.Request): ccfapp.Response<any> {
     const controllerIdentifier = request.params.id;
-    
+
     // Check an identifier has been provided and
     // if not return 400 Bad Request
     if (!controllerIdentifier) {
@@ -63,27 +63,18 @@ export function sign(request: ccfapp.Request): ccfapp.Response<any> {
         hash: 'SHA-256'
     };
 
+    // Encode the payload, generate the signature and
+    // then convert to a Base64URL encoded string
     const payloadBuffer = ccfapp.string.encode(payload);
     const signatureBuffer = crypto.sign(signingAlgorithm, currentKey.privateKey, payloadBuffer);
-    const signature = ccfapp.string.decode(signatureBuffer);
-    const signatureBase64 = Base64.encode(signature);
-
-    // When verifying using the original buffers, all OK.
-    // However, if I convert the signature to B64 and then back again fails.
-    const signatureToValidate = ccfapp.string.encode(Base64.decode(signatureBase64));
-    const isSignatureValid = crypto.verifySignature(
-        signingAlgorithm, 
-        currentKey.publicKey, 
-        signatureToValidate,
-        payloadBuffer);
+    const signature = Base64.fromUint8Array(new Uint8Array(signatureBuffer), true);
 
     return {
         statusCode: 200,
         body: {
-            "signature": signatureBase64,
+            "signature": signature,
             "algorithm": signingAlgorithm,
-            "keyIdentifier": currentKey.id,
-            "isValid": isSignatureValid
+            "keyIdentifier": currentKey.id
         }
     };
 }

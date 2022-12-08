@@ -75,25 +75,17 @@ export function verify(request: ccfapp.Request): ccfapp.Response<any> {
         hash: 'SHA-256'
     };
 
-    try{
-        const signature = Base64.fromBase64(signatureBase64);
-        const isSignatureValid = crypto.verifySignature(
-            signingAlgorithm, 
-            currentKey.publicKey, 
-            ccfapp.string.encode(signature), 
-            ccfapp.string.encode(payload));
+    // Encode the payload, convert the base64URL encoded
+    // signature to an array and verify signature
+    const signature = Base64.toUint8Array(signatureBase64);
+    const isSignatureValid = crypto.verifySignature(
+        signingAlgorithm, 
+        currentKey.publicKey, 
+        signature.buffer, 
+        ccfapp.string.encode(payload));
 
-        return {
-            statusCode: 200,
-            body: isSignatureValid
-        };
-    } catch(error: any) {
-        console.error(`Verify operation failed with: ${error.message}`);
-        return {
-            statusCode: 500,
-            body: {
-                "errorMessage": error.message
-            }
-        }
-    }
+    return {
+        statusCode: 200,
+        body: isSignatureValid
+    };
 }

@@ -1,11 +1,11 @@
 /**
- * Enumeration key algorithms.
+ * Enumeration of key algorithms.
  */
  export enum KeyAlgorithm {
     /**
      * RSA Algorithm.
      */
-    Rsa = 'RSASSA_PKCS1-v1_5',
+    Rsa = 'RSASSA-PKCS1-v1_5',
 
     /**
      * ECDSA Algorithm.
