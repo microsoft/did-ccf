@@ -72,10 +72,82 @@
         }
       }
     },
-    "/identifiers/{id}/sign": {
+    "/identifiers/{id}/signature/sign": {
       "post": {
-        "js_module": "endpoints/identifier/sign.js",
+        "js_module": "endpoints/identifier/signature/sign.js",
         "js_function": "sign",
+        "forwarding_required": "always",
+        "authn_policies": ["member_signature"],
+        "mode": "readonly",
+        "openapi": {
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "properties": {
+                      "error": {
+                        "description": "Error message",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "error"
+                    ],
+                    "type": "object",
+                    "additionalProperties": false
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "properties": {
+                      "error": {
+                        "description": "Error message",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "error"
+                    ],
+                    "type": "object",
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identifiers/{id}/signature/verify": {
+      "post": {
+        "js_module": "endpoints/identifier/signature/verify.js",
+        "js_function": "verify",
         "forwarding_required": "always",
         "authn_policies": ["member_signature"],
         "mode": "readonly",
@@ -160,9 +232,9 @@
               "schema": {
                 "type": "string",
                 "enum": [
-                  "rsa",
-                  "ecdsa",
-                  "eddsa"
+                  "RSASSA-PKCS1-v1_5",
+                  "ECDSA",
+                  "EdDSA"
                 ]
               }
             },
@@ -259,9 +331,9 @@
               "schema": {
                 "type": "string",
                 "enum": [
-                  "rsa",
-                  "ecdsa",
-                  "eddsa"
+                  "RSASSA-PKCS1-v1_5",
+                  "ECDSA",
+                  "EdDSA"
                 ]
               }
             },
