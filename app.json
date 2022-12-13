@@ -1,5 +1,64 @@
 {
   "endpoints": {
+    "/identifiers/create": {
+      "post": {
+        "js_module": "endpoints/identifier/create.js",
+        "js_function": "create",
+        "forwarding_required": "always",
+        "authn_policies": ["member_signature"],
+        "mode": "readwrite",
+        "openapi": {
+          "parameters": [
+            {
+              "name": "alg",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "RSASSA-PKCS1-v1_5",
+                  "ECDSA",
+                  "EdDSA"
+                ]
+              }
+            },
+            {
+              "name": "size",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "curve",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "secp256r1",
+                  "secp256k1",
+                  "secp384r1",
+                  "curve25519"
+                ]
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Created",
+              "content": {
+                "application/json": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identifiers/{id}/resolve": {
       "get": {
         "js_module": "endpoints/identifier/resolve.js",
@@ -7,6 +66,78 @@
         "forwarding_required": "always",
         "authn_policies": [],
         "mode": "readonly",
+        "openapi": {
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "properties": {
+                      "error": {
+                        "description": "Error message",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "error"
+                    ],
+                    "type": "object",
+                    "additionalProperties": false
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "properties": {
+                      "error": {
+                        "description": "Error message",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "error"
+                    ],
+                    "type": "object",
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identifiers/{id}/deactivate": {
+      "get": {
+        "js_module": "endpoints/identifier/deactivate.js",
+        "js_function": "deactivate",
+        "forwarding_required": "always",
+        "authn_policies": ["member_signature"],
+        "mode": "readwrite",
         "openapi": {
           "parameters": [
             {
@@ -209,65 +340,6 @@
                     "type": "object",
                     "additionalProperties": false
                   }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identifiers/create": {
-      "post": {
-        "js_module": "endpoints/identifier/create.js",
-        "js_function": "create",
-        "forwarding_required": "always",
-        "authn_policies": ["member_signature"],
-        "mode": "readwrite",
-        "openapi": {
-          "parameters": [
-            {
-              "name": "alg",
-              "in": "query",
-              "required": false,
-              "schema": {
-                "type": "string",
-                "enum": [
-                  "RSASSA-PKCS1-v1_5",
-                  "ECDSA",
-                  "EdDSA"
-                ]
-              }
-            },
-            {
-              "name": "size",
-              "in": "query",
-              "required": false,
-              "schema": {
-                "type": "number"
-              }
-            },
-            {
-              "name": "curve",
-              "in": "query",
-              "required": false,
-              "schema": {
-                "type": "string",
-                "enum": [
-                  "secp256r1",
-                  "secp256k1",
-                  "secp384r1",
-                  "curve25519"
-                ]
-              }
-            }
-          ],
-          "responses": {
-            "201": {
-              "description": "Created",
-              "content": {
-                "application/json": {
-                  "type": "object",
-                  "additionalProperties": true
                 }
               }
             }

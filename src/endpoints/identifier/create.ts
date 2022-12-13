@@ -13,9 +13,9 @@ import { QueryStringParser } from '../../models/QueryStringParser';
 import { KeyPairCreator } from '../../models/KeyPairCreator';
 
 /**
- * Creates a new decentralized identifier
- * @param request
- * @returns
+ * Creates a new decentralized identifier in the scope of the member.
+ * @param {ccfapp.Request} request containing the CCF request context.
+ * @returns HTTP 201 Created and the {@link ControllerDocument} for the newly created identifier.
  */
 export function create (request: ccfapp.Request): ccfapp.Response {
   // Decentralized Identifiers (DIDs) are created in the scope

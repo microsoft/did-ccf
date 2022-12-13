@@ -1,6 +1,11 @@
 import * as ccfapp from '@microsoft/ccf-app';
 import MemberIdentifierKeys from '../../models/MemberIdentifierKeys';
 
+/**
+ * Resolves the specified decentralized identifier.
+ * @param {ccfapp.Request} request containing the CCF request context.
+ * @returns HTTP 200 Created and the {@link ControllerDocument} for the identifier.
+ */
 export function resolve (request: ccfapp.Request): ccfapp.Response<any> {
   const controllerIdentifier = request.params.id;
 

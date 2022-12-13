@@ -19,6 +19,7 @@ export * from './models/QueryStringParser';
 are referenced in the app.json file. */
 export * from './endpoints/identifier/create';
 export * from './endpoints/identifier/resolve';
+export * from './endpoints/identifier/deactivate';
 export * from './endpoints/identifier/signature/sign';
 export * from './endpoints/identifier/signature/verify';
 export * from './endpoints/identifier/keys/list';
