@@ -132,7 +132,7 @@
       }
     },
     "/identifiers/{id}/deactivate": {
-      "get": {
+      "patch": {
         "js_module": "endpoints/identifier/deactivate.js",
         "js_function": "deactivate",
         "forwarding_required": "always",
