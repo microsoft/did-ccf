@@ -100,7 +100,11 @@ Supported ECDSA curves (curve):
 ```
 
 ### Deactivate
-Not currently supported.
+All authenticated members of the consortium can deactivate an identifier that is under their control by calling the **identifiers/<did>/decativate** endpoint. This API checks that the member making the request is the owner of the identifier and if true, removes the identifier and all it's associated keys from the network.
+
+```
+./scurl.sh https://<host>/app/identifiers/<did>/deactivate --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> -H "content-type: application/json" -X PATCH
+```
 
 ## Security and Privacy Considerations
 Confidential Consortium Framework (CCF) is an open-source framework for building highly available stateful services that leverage centralized compute for ease of use and performance, while providing decentralized trust. It enables multiple parties to execute auditable compute over confidential data without trusting each other or a privileged operator.
