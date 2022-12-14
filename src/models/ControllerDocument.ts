@@ -36,12 +36,12 @@ export default class ControllerDocument {
     /**
      * Context for the document.
      */
-    '@context': (string | any);
+    '@context': (string | any); 
 
     /**
      * Array of {@link VerificationMethod}.
      */
-    public verificationMethods: Array<VerificationMethod> = [];
+    public verificationMethod: Array<VerificationMethod> = [];
 
     /**
      * Constructs a new instance of the class.
@@ -53,7 +53,7 @@ export default class ControllerDocument {
         this['@context'] =  [
             "https://www.w3.org/ns/did/v1",
             {
-                "@base": id
+                "@vocab": "https://github.com/microsoft/did-ccf/blob/main/DID_CCF.md#"
             }
         ]
     }
@@ -73,7 +73,7 @@ export default class ControllerDocument {
             verificationMethod.controller = this.id;
         }
 
-        this.verificationMethods.push(verificationMethod);
+        this.verificationMethod.push(verificationMethod);
 
         if (Array.isArray(relationships) && relationships.length > 0) {
             relationships.forEach((relationship) => {
