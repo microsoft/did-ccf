@@ -52,7 +52,7 @@ export abstract class KeyPair implements KeyPair {
      * @param {string} privateKey of the key pair.
      */
     constructor(algorithm: KeyAlgorithm, publicKey: string, privateKey: string) {
-        this.id = Identifier.generate();
+        this.id = `#${Identifier.generate()}`;
         this.algorithm = algorithm;
         this.publicKey = publicKey;
         this.privateKey = privateKey;

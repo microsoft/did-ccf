@@ -55,7 +55,7 @@ export function revoke (request: ccfapp.Request): ccfapp.Response {
   delete matchedKey.privateKey;
 
   // Remove the method from the verification methods array
-  memberIdentifierKeys.controllerDocument.verificationMethods = memberIdentifierKeys.controllerDocument.verificationMethods.filter(verificationMethod => verificationMethod.id !== keyIdentifier);
+  memberIdentifierKeys.controllerDocument.verificationMethod = memberIdentifierKeys.controllerDocument.verificationMethod.filter(verificationMethod => verificationMethod.id !== keyIdentifier);
 
   // Now remove from any references from relationships. Use the 
   // enum values since the document relationships begin lower case.

@@ -54,9 +54,9 @@ https://<host>.com/app/identifiers/<did>/resolve
 ```json
 {
     "id": "did:ccf:entra.confidential-ledger.azure.com:6eJ3sNIa83RmotH2qy2AH3FBsBvcAAtwpCwkHRwu1hg",
-    "verificationMethods": [
+    "verificationMethod": [
         {
-            "id": "z2zHnxFN2QCK",
+            "id": "#z2zHnxFN2QCK",
             "controller": "did:ccf:entra.confidential-ledger.azure.com:6eJ3sNIa83RmotH2qy2AH3FBsBvcAAtwpCwkHRwu1hg",
             "type": "JsonWebKey2020",
             "publicKeyJwk": {
@@ -70,7 +70,7 @@ https://<host>.com/app/identifiers/<did>/resolve
     "@context": [
         "https://www.w3.org/ns/did/v1",
         {
-            "@base": "did:ccf:entra.confidential-ledger.azure.com:6eJ3sNIa83RmotH2qy2AH3FBsBvcAAtwpCwkHRwu1hg"
+           "@vocab": "https://github.com/microsoft/did-ccf/blob/main/DID_CCF.md#"
         }
     ],
     "authentication": [
