@@ -17,8 +17,8 @@ export class QueryStringParser {
     constructor (public queryString: string) {
         
         let param;   
-
-        while (param = QueryStringParser.PARSER_REGEX.exec(queryString)){
+        const decodedQueryString = decodeURIComponent(queryString);
+        while (param = QueryStringParser.PARSER_REGEX.exec(decodedQueryString)){
             this[param[1]] = param[2];
         }
     }

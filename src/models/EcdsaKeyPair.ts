@@ -1,8 +1,9 @@
 import * as crypto from '@microsoft/ccf-app/crypto';
 import { JsonWebKey } from '@microsoft/ccf-app/global';
-import { EcdsaCurve } from './EcdsaCurve';
-import { KeyAlgorithm } from './KeyAlgorithm';
-import { KeyPair } from './KeyPair';
+import { EcdsaCurve } from '../models/EcdsaCurve'; 
+import { KeyAlgorithm } from '../models/KeyAlgorithm';
+import { KeyPair } from '../models/KeyPair';
+import { KeyUse } from './KeyUse';
 
 /**
  * Implementation of an ECDSA key pair.
@@ -11,10 +12,11 @@ export class EcdsaKeyPair extends KeyPair {
 
     /**
      * Constructs a new instance of the {@link EcdsaKeyPair} class.
+     * @param {KeyUse} [use=KeyUse.Signing] indicating what the key can be used for.
      */
-    constructor(curve: EcdsaCurve = EcdsaCurve.Secp256r1) {
+    constructor(curve: EcdsaCurve = EcdsaCurve.Secp256r1, use: KeyUse = KeyUse.Signing) {
         const { publicKey, privateKey } = crypto.generateEcdsaKeyPair(curve);
-        super(KeyAlgorithm.Ecdsa, publicKey, privateKey);
+        super(KeyAlgorithm.Ecdsa, publicKey, privateKey, use);
         this.curve = curve;
     }
 

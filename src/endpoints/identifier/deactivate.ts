@@ -1,56 +1,53 @@
-import * as ccfapp from '@microsoft/ccf-app';
-import MemberIdentifierKeys from '../../models/MemberIdentifierKeys';
+import { Request, Response } from '@microsoft/ccf-app';
+import { AuthenticatedIdentity, IdentifierStore } from '../../models';
+import {
+    IdentifierNotFound, 
+    IdentifierNotProvided, 
+    InvalidController 
+} from '../../errors';
 
 /**
  * Deactivates the specified decentralized identifier.
- * @param {ccfapp.Request} request containing the CCF request context.
+ * @param {Request} request containing the CCF request context.
  * @returns HTTP 200 OK on successful deactivation of the decentralized identifier.
  */
-export function deactivate (request: ccfapp.Request): ccfapp.Response<any> {
-    // Decentralized Identifiers (DIDs) are created in the scope
-    // of a network member. Members are not limited in the number
-    // of identifiers they can create.
-    const memberId = <ccfapp.MemberSignatureAuthnIdentity>request.caller;
-    const controllerIdentifier = request.params.id;
+export function deactivate (request: Request): Response<any> {
+    // Get the authentication details of the caller
+    const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
+    const controllerIdentifier = decodeURIComponent(request.params.id);
 
     // Check an identifier has been provided and
     // if not return 400 Bad Request
     if (!controllerIdentifier) {
-        return {
-        statusCode: 400,
-        body: {
-            error: 'A controller identifier must be specified.',
-        },
-        };
+        const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
+        console.log(identifierNotProvided);
+        return identifierNotProvided.toErrorResponse();
     }
 
     // Try read the identifier from the store
-    const identifierStore = ccfapp.typedKv('member_identifier_store', ccfapp.string, ccfapp.json<MemberIdentifierKeys>());
-    const memberIdentifierKeys: MemberIdentifierKeys =  <MemberIdentifierKeys>identifierStore.get(controllerIdentifier);
+    const identifierStore = new IdentifierStore();
+    const identifierKeys = identifierStore.read(controllerIdentifier);
 
-    if (!memberIdentifierKeys) {
-        return {
-        statusCode: 404,
-        body: {
-            error: `Specified identifier '${controllerIdentifier}' not found on the network.`,
-        },
-        };
+    // Try read the identifier from the store
+    if (!identifierKeys) {
+        const identifierNotFound = new IdentifierNotFound(controllerIdentifier, authenticatedIdentity);
+        console.log(identifierNotFound);
+        return identifierNotFound.toErrorResponse();
     }
 
     // Check that the member is the owner of the
     // identifier.
-    if (memberIdentifierKeys.memberId !== memberId.id) {
-        return {
-        statusCode: 400,
-        body: {
-            error: `Specified identifier '${controllerIdentifier}' is not owned by the consortium member with ID '${memberId}'.`,
-        },
-        };
+    if (identifierKeys.memberId !== authenticatedIdentity.identifier) {
+        const invalidController = new InvalidController(authenticatedIdentity);
+        // Log as a warning, since this could be a legitimate client error,
+        // but monitor for security. 
+        console.warn(invalidController);
+        return invalidController.toErrorResponse();
     }
 
-    // Delete the controller identifier from the store. This removes
+    // Remove the controller identifier from the store. This removes
     // the controller document and all associated keys from the store.
-    identifierStore.delete(controllerIdentifier);
+    identifierStore.remove(controllerIdentifier);
 
     return {
         statusCode: 200

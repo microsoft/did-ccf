@@ -1,76 +1,95 @@
-import * as ccfapp from '@microsoft/ccf-app';
-import * as crypto from '@microsoft/ccf-app/crypto';
+import { 
+    Request, 
+    Response,
+    string as stringConverter, 
+  } from '@microsoft/ccf-app';
+import { 
+    SigningAlgorithm, 
+    verifySignature 
+} from '@microsoft/ccf-app/crypto';
+import { 
+    AlgorithmName, 
+} from '@microsoft/ccf-app/global';
 import { Base64 } from 'js-base64';
-import { AlgorithmName, ccf } from '@microsoft/ccf-app/global';
-import { KeyState } from '../../../models/KeyState';
-import MemberIdentifierKeys from '../../../models/MemberIdentifierKeys';
+import { 
+    IdentifierNotFound,
+    IdentifierNotProvided,
+    PayloadNotProvided,
+    SignatureNotProvided,
+    SignerIdentifierNotProvided,
+    KeyNotConfigured
+} from '../../../errors';
+import { 
+    AuthenticatedIdentity,
+    SignedPayload, 
+    IdentifierStore,
+    KeyUse
+} from '../../../models';
 
-export function verify(request: ccfapp.Request): ccfapp.Response<any> {
-    const controllerIdentifier = request.params.id;
+/**
+ * Verifies the signature for the specified payload.
+ * @param {Request} request containing the CCF request context.
+ * @returns HTTP 200 OK and a boolean indicating whether the signature is valid.
+ */
+export function verify(request: Request): Response<any> {
+    // Get the authentication details of the caller
+    const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
+    const controllerIdentifier = decodeURIComponent(request.params.id);
     
     // Check an identifier has been provided and
     // if not return 400 Bad Request
     if (!controllerIdentifier) {
-        return {
-            statusCode: 400,
-            body: {
-                error: 'A controller identifier must be specified.',
-            },
-        };
+        const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
+        console.log(identifierNotProvided);
+        return identifierNotProvided.toErrorResponse();
     }
 
     // Get the signature and payload from
     // the body JSON and validate before we do any
     // real work.
-    const bodyJson = request.body.json();
-    const signatureBase64 = bodyJson?.signature;
-    const payload = bodyJson?.payload;
+    const bodyJson = <SignedPayload>request.body.json();
+    const signatureBase64 = bodyJson.signature;
+    const payload = bodyJson.payload;
+    const signerIdentifier = bodyJson.signer;
+    
     if (!signatureBase64 || signatureBase64.length === 0) {
-        return {
-            statusCode: 400,
-            body: {
-                error: `The request does not include a signature to verify. Both a signature and payload are required.`,
-            },
-        };
+        const signatureNotProvided = new SignatureNotProvided(authenticatedIdentity);
+        console.log(signatureNotProvided);
+        return signatureNotProvided.toErrorResponse();
     }
     
     if (!payload || payload.length === 0) {
-        return {
-            statusCode: 400,
-            body: {
-                error: `The request does not include a payload to verify. Both a signature and payload are required.`,
-            },
-        };
+        const payloadNotProvided = new PayloadNotProvided(authenticatedIdentity);
+        console.log(payloadNotProvided);
+        return payloadNotProvided.toErrorResponse();
+    }
+
+    if (!signerIdentifier || signerIdentifier.length === 0) {
+        const signerIdentifierNotProvided = new SignerIdentifierNotProvided(authenticatedIdentity);
+        console.log(signerIdentifierNotProvided);
+        return signerIdentifierNotProvided.toErrorResponse();
     }
 
     // Try read the identifier from the store
-    const identifierStore = ccfapp.typedKv('member_identifier_store', ccfapp.string, ccfapp.json<MemberIdentifierKeys>());
-    const memberIdentifierKeys: MemberIdentifierKeys = <MemberIdentifierKeys>identifierStore.get(controllerIdentifier);
-
-    if (!memberIdentifierKeys) {
-        return {
-            statusCode: 404,
-            body: {
-                error: `Specified identifier '${controllerIdentifier}' not found on the network.`,
-            },
-        };
+    const identifierKeys = new IdentifierStore().read(controllerIdentifier);
+    if (!identifierKeys) {
+        const identifierNotFound = new IdentifierNotFound(controllerIdentifier, authenticatedIdentity);
+        console.log(identifierNotFound);
+        return identifierNotFound.toErrorResponse();
     }
 
-    // Attempt to get the current signing key for the identifier, returning
-    // and error if no signing key with a state marked as current is present in the members
-    // key list.
-    const currentKey = memberIdentifierKeys.keyPairs.find(key => key.state === KeyState.Current);
-
+    // Get the current signing key and return error if
+    // one is not returned.
+    const currentKey = identifierKeys.getCurrentKey(KeyUse.Signing);
     if (!currentKey) {
-        return {
-            statusCode: 500,
-            body: {
-                error: `Specified identifier '${controllerIdentifier}' does not have a signing key.`,
-            },
-        };
+        const keyNotConfigured = new KeyNotConfigured(authenticatedIdentity, controllerIdentifier);
+        // Send to the console as an error since this is not
+        // a client recoverable error.
+        console.error(keyNotConfigured);
+        return keyNotConfigured.toErrorResponse();
     }
 
-    const signingAlgorithm: crypto.SigningAlgorithm = {
+    const signingAlgorithm: SigningAlgorithm = {
         name: <AlgorithmName>currentKey.algorithm.toString(),
         hash: 'SHA-256'
     };
@@ -78,11 +97,11 @@ export function verify(request: ccfapp.Request): ccfapp.Response<any> {
     // Encode the payload, convert the base64URL encoded
     // signature to an array and verify signature
     const signature = Base64.toUint8Array(signatureBase64);
-    const isSignatureValid = crypto.verifySignature(
+    const isSignatureValid = verifySignature(
         signingAlgorithm, 
         currentKey.publicKey, 
         signature.buffer, 
-        ccfapp.string.encode(payload));
+        stringConverter.encode(payload));
 
     return {
         statusCode: 200,

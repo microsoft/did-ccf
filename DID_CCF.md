@@ -100,7 +100,7 @@ Supported ECDSA curves (curve):
 ```
 
 ### Deactivate
-All authenticated members of the consortium can deactivate an identifier that is under their control by calling the **identifiers/<did>/decativate** endpoint. This API checks that the member making the request is the owner of the identifier and if true, removes the identifier and all it's associated keys from the network.
+All authenticated members of the consortium can deactivate an identifier that is under their control by calling the **identifiers/<did>/deactivate** endpoint. This API checks that the member making the request is the owner of the identifier and if true, removes the identifier and all it's associated keys from the network.
 
 ```
 ./scurl.sh https://<host>/app/identifiers/<did>/deactivate --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> -H "content-type: application/json" -X PATCH
