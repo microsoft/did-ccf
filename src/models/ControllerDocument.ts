@@ -1,37 +1,10 @@
-import { VerificationMethodRelationship } from './VerificationMethodRelationship';
-import { VerificationMethodType } from './VerificationMethodType';
-
-/**
- * Model for representing a {@link https://www.w3.org/TR/did-core/} verification
- * method.
- */
-export interface VerificationMethod {
-    /**
-     * The id for the verification method
-     */
-    id: string;
-
-    /**
-     * The controller of the verification method. Defaults
-     * to the {@link DidDocument.id } if not specified.
-     */
-    controller?: string;
-
-    /**
-     * The {@link VerificationMethodType}.
-     */
-    type: VerificationMethodType;
-
-    /**
-     * The public key in Json Web Key (JWK) format.
-     */
-    publicKeyJwk: any;
-}
-
+import { VerificationMethod } from './VerificationMethod';
+import { VerificationMethodRelationship } from './VerificationMethodRelationship'; 
+    
 /**
  * Model for representing a {@link https://www.w3.org/TR/did-core/} controller document.
  */
-export default class ControllerDocument {
+export class ControllerDocument {
 
     /**
      * Context for the document.
@@ -44,7 +17,7 @@ export default class ControllerDocument {
     public verificationMethod: Array<VerificationMethod> = [];
 
     /**
-     * Constructs a new instance of the class.
+     * Constructs a new instance of the {@link ControllerDocument} class.
      * @param {string} id - for the document.
      */
     constructor (public id: string) {
@@ -62,7 +35,7 @@ export default class ControllerDocument {
      * Adds a verification method to the document and adds a entry for the method in the optionally specified
      * relationship.
      * @param {VerificationMethod} verificationMethod - to add to the instance.
-     * @param {Array<VerificationMethodRelationship>}[optional] relationships - for defining the relationship between a DID subject and the {@link VerificationMethod}.
+     * @param {Array<VerificationMethodRelationship>}[relationships] - for defining the relationship between a DID subject and the {@link VerificationMethod}.
      * @returns {void}.
      */
     public addVerificationMethod (verificationMethod: VerificationMethod, relationships?: Array<VerificationMethodRelationship>): void {
@@ -77,14 +50,15 @@ export default class ControllerDocument {
 
         if (Array.isArray(relationships) && relationships.length > 0) {
             relationships.forEach((relationship) => {
-                const relationshipArray = this[relationship.toString()];
+                const relationshipAsString = relationship.toString();
+                const relationshipArray = this[relationshipAsString];
 
                 // Check if an array has been created already
                 if (!Array.isArray(relationshipArray)) {
-                    this[relationship.toString()] = [];
+                    this[relationshipAsString] = [];
                 }
 
-                this[relationship.toString()].push(verificationMethod.id);
+                this[relationshipAsString].push(verificationMethod.id);
             });
         }
     }

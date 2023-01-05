@@ -1,27 +1,32 @@
-const ID_CHARACTERS: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-const ID_LENGTH: number = 12;
+import { IdentifierKeys } from './IdentifierKeys';
+import { IdentifierStore } from './IdentifierStore';
+import { ResolveResult } from './ResolveResult';
 
 /**
  * Generates an identifier that can be used for uniquely identifying resources.
  */
-export class Identifier {
+export abstract class Identifier {
     /**
-     * Creates a new random character ID for the identifier.
-     * @param {number} [length] of the ID. Default is 12.
-     * @returns {string} of random characters of the specified length.
-     * @description First approach tried using UNIX epoch time 
-     * converted to a string as the identifier, but
-     * Date() is not supported by a CCF enclave. Nor are UUIDs since
-     * these are date derived.
+     * Looks for the specified controller identifier in the member identifier store that is
+     * local to the network.
+     * @param {string} [controllerIdentifier] to resolve.
+     * @returns {ResolveResult} indicating whether the specified identifier was found on the network 
+     * and if so its associated controller document.
      */
-    public static generate(length = ID_LENGTH): string {
-        const charactersLength = ID_CHARACTERS.length;
-        let id = '';
-
-        for (var i = 0; i < length; i++) {
-            id += ID_CHARACTERS.charAt(Math.floor(Math.random() * charactersLength));
+    public static resolveLocal (controllerIdentifier: string) : ResolveResult {
+        // Try read the identifier from the store
+        const identifierKeys = new IdentifierStore().read(controllerIdentifier);
+        
+        if (identifierKeys) {
+            return {
+                found: true,
+                controllerDocument: identifierKeys.controllerDocument
+            }
         }
 
-        return id;
+        // Identifier not found return false.
+        return {
+            found: false
+        };
     }
 }

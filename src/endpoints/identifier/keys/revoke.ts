@@ -1,76 +1,77 @@
-import * as ccfapp from '@microsoft/ccf-app';
-import { KeyState } from '../../../models/KeyState';
-import MemberIdentifierKeys from '../../../models/MemberIdentifierKeys';
-import { VerificationMethodRelationship } from '../../../models/VerificationMethodRelationship';
+import { Request, Response } from '@microsoft/ccf-app';
+import { 
+  IdentifierNotFound, 
+  IdentifierNotProvided, 
+  KeyNotFound 
+} from '../../../errors';
+import {
+  AuthenticatedIdentity,
+  KeyState, 
+  IdentifierStore, 
+  VerificationMethodRelationship 
+} from '../../../models';
 
 /**
  * Revokes the specified key pair associated with the controller
  * identifier.
- * @param {ccfapp.Request} request passed to the API.
+ * @param {Request} request passed to the API.
  */
-export function revoke (request: ccfapp.Request): ccfapp.Response {
-  const controllerIdentifier: string = request.params.id;
-  const keyIdentifier: string = request.params.kid;
+export function revoke (request: Request): Response {
+  // Get the authentication details of the caller
+  const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
+  const controllerIdentifier: string = decodeURIComponent(request.params.id);
+  const keyIdentifier: string = decodeURIComponent(request.params.kid);
   
   // Check an identifier has been provided and
   // if not return 400 Bad Request
   if (!controllerIdentifier) {
-    return {
-      statusCode: 400,
-      body: {
-        error: 'A controller identifier must be specified.',
-      },
-    };
+    const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
+    console.log(identifierNotProvided);
+    return identifierNotProvided.toErrorResponse();
   }
 
-  // Try read the identifier from the store
-  const identifierStore = ccfapp.typedKv('member_identifier_store', ccfapp.string, ccfapp.json<MemberIdentifierKeys>());
-  const memberIdentifierKeys: MemberIdentifierKeys =  <MemberIdentifierKeys>identifierStore.get(controllerIdentifier);
+  const identifierStore = new IdentifierStore();
 
-  if (!memberIdentifierKeys) {
-    return {
-      statusCode: 404,
-      body: {
-        error: `Specified identifier '${controllerIdentifier}' not found on the network.`,
-      },
-    };
+  // Try read the identifier from the store
+  const identifierKeys = identifierStore.read(controllerIdentifier);
+  if (!identifierKeys) {
+    const identifierNotFound = new IdentifierNotFound(controllerIdentifier, authenticatedIdentity);
+    console.log(identifierNotFound);
+    return identifierNotFound.toErrorResponse();
   }
 
   // Get the current key from the members keys then
   // 1. Update the state to revoked
   // 2. Remove the private key
   // 3. Remove key entry from controller document
-  const matchedKey = memberIdentifierKeys.keyPairs.find(key => key.id === keyIdentifier);
-
+  // Get matchedKey
+  const matchedKey = identifierKeys.getKeyById(keyIdentifier);
   if (!matchedKey) {
-    return {
-      statusCode: 404,
-      body: {
-        error: `Specified key with id '${keyIdentifier}' not found for identifier '${controllerIdentifier}'.`,
-      },
-    };
+    const keyNotFound = new KeyNotFound(authenticatedIdentity, controllerIdentifier, keyIdentifier);
+    console.log(keyNotFound);
+    return keyNotFound.toErrorResponse();
   }
 
   matchedKey.state = KeyState.Revoked;
   delete matchedKey.privateKey;
 
   // Remove the method from the verification methods array
-  memberIdentifierKeys.controllerDocument.verificationMethod = memberIdentifierKeys.controllerDocument.verificationMethod.filter(verificationMethod => verificationMethod.id !== keyIdentifier);
+  identifierKeys.controllerDocument.verificationMethod = identifierKeys.controllerDocument.verificationMethod.filter(verificationMethod => verificationMethod.id !== keyIdentifier);
 
   // Now remove from any references from relationships. Use the 
   // enum values since the document relationships begin lower case.
   Object.values(VerificationMethodRelationship).forEach(relationship => {
-    if (memberIdentifierKeys.controllerDocument.hasOwnProperty(relationship)){
-      memberIdentifierKeys.controllerDocument[relationship] = memberIdentifierKeys.controllerDocument[relationship].filter(reference => reference !== keyIdentifier);
+    if (identifierKeys.controllerDocument.hasOwnProperty(relationship)){
+      identifierKeys.controllerDocument[relationship] = identifierKeys.controllerDocument[relationship].filter(reference => reference !== keyIdentifier);
     }
   });
   
   // Store the updated controller document and identifier keys
-  identifierStore.set(controllerIdentifier, memberIdentifierKeys);
+  identifierStore.addOrUpdate(controllerIdentifier, identifierKeys);
   
   // Return 201 and the controller document representing the updated controller document.
   return {
     statusCode: 200,
-    body: memberIdentifierKeys.controllerDocument
+    body: identifierKeys.controllerDocument
   };
 }

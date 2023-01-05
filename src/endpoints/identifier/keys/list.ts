@@ -1,54 +1,40 @@
-import * as ccfapp from '@microsoft/ccf-app';
-import { KeyAlgorithm } from '../../../models/KeyAlgorithm';
-import MemberIdentifierKeys from '../../../models/MemberIdentifierKeys';
+import { Request, Response} from '@microsoft/ccf-app';
+import { IdentifierNotFound, IdentifierNotProvided } from '../../../errors';
+import {
+  AuthenticatedIdentity,
+  IdentifierStore
+} from '../../../models';
 
 /**
- * Lists the keys associated with the controller
- * identifier.
- * @param {ccfapp.Request} request passed to the API.
+ * Lists the keys associated with the controller identifier.
+ * @param {Request} request passed to the API.
  */
-export function list (request: ccfapp.Request): ccfapp.Response {
-  const controllerIdentifier: string = request.params.id;
+export function list (request: Request): Response {
+  // Get the authentication details of the caller
+  const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
+  const controllerIdentifier: string = decodeURIComponent(request.params.id);
   
   // Check an identifier has been provided and
   // if not return 400 Bad Request
   if (!controllerIdentifier) {
-    return {
-      statusCode: 400,
-      body: {
-        error: 'A controller identifier must be specified.',
-      },
-    };
+    const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
+    console.log(identifierNotProvided);
+    return identifierNotProvided.toErrorResponse();
   }
 
   // Try read the identifier from the store
-  const identifierStore = ccfapp.typedKv('member_identifier_store', ccfapp.string, ccfapp.json<MemberIdentifierKeys>());
-  const memberIdentifierKeys: MemberIdentifierKeys =  <MemberIdentifierKeys>identifierStore.get(controllerIdentifier);
-
-  if (!memberIdentifierKeys) {
-    return {
-      statusCode: 404,
-      body: {
-        error: `Specified identifier '${controllerIdentifier}' not found on the network.`,
-      },
-    };
+  const identifierKeys = new IdentifierStore().read(controllerIdentifier);
+  if (!identifierKeys) {
+    const identifierNotFound = new IdentifierNotFound(controllerIdentifier, authenticatedIdentity);
+    console.log(identifierNotFound);
+    return identifierNotFound.toErrorResponse();
   }
 
   // Remove the private keys from the collection before
   // returning id, public key and state
-  // DEBUG why this map returns all props
-  //const keys = memberIdentifierKeys.keyPairs.map<KeyPair>(keyPair => { return {id: keyPair.id, state: keyPair.state, publicKey: keyPair.publicKey } = keyPair });
-  const keys = memberIdentifierKeys.keyPairs.map<any>(keyPair => { 
-      const key = {};
-      key['id'] = keyPair.id;
-      key['state'] = keyPair.state;
-      key['algorithm'] = keyPair.algorithm;
-      if (keyPair.algorithm === KeyAlgorithm.Ecdsa) {
-        key['curve'] = keyPair.curve;
-      }
-      key['publicKey'] = keyPair.publicKey;
-
-      return key;
+  const keys = identifierKeys.keyPairs.map<any>(keyPair => { 
+      let {privateKey, ...redactedKey} = keyPair;
+      return redactedKey;
   });
 
   return {

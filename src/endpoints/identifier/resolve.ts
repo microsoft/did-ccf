@@ -1,40 +1,26 @@
-import * as ccfapp from '@microsoft/ccf-app';
-import MemberIdentifierKeys from '../../models/MemberIdentifierKeys';
+import { Request, Response } from '@microsoft/ccf-app';
+import { IdentifierNotFound, IdentifierNotProvided, } from '../../errors';
+import { AuthenticatedIdentity, Identifier } from '../../models';
 
 /**
  * Resolves the specified decentralized identifier.
- * @param {ccfapp.Request} request containing the CCF request context.
+ * @param {Request} request containing the CCF request context.
  * @returns HTTP 200 Created and the {@link ControllerDocument} for the identifier.
  */
-export function resolve (request: ccfapp.Request): ccfapp.Response<any> {
-  const controllerIdentifier = request.params.id;
+export function resolve (request: Request): Response<any> {
+  // Get the authentication details of the caller
+  const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
+  const controllerIdentifier = decodeURIComponent(request.params.id);
 
-  // Check an identifier has been provided and
-  // if not return 400 Bad Request
-  if (!controllerIdentifier) {
-    return {
-      statusCode: 400,
-      body: {
-        error: 'A controller identifier must be specified.',
-      },
-    };
-  }
-
-  // Try read the identifier from the store
-  const identifierStore = ccfapp.typedKv('member_identifier_store', ccfapp.string, ccfapp.json<MemberIdentifierKeys>());
-  const memberIdentifierKeys: MemberIdentifierKeys =  <MemberIdentifierKeys>identifierStore.get(controllerIdentifier);
-
-  if (!memberIdentifierKeys) {
-    return {
-      statusCode: 404,
-      body: {
-        error: `Specified identifier '${controllerIdentifier}' not found on the network.`,
-      },
-    };
+  const resolveResult = Identifier.resolveLocal(controllerIdentifier);
+  if (!resolveResult.found) {
+    const identifierNotFound = new IdentifierNotFound(controllerIdentifier, authenticatedIdentity);
+    console.log(identifierNotFound);
+    return identifierNotFound.toErrorResponse();
   }
 
   return {
     statusCode: 200,
-    body: memberIdentifierKeys.controllerDocument
+    body: resolveResult.controllerDocument
   };
 }

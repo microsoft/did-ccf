@@ -1,5 +1,28 @@
 {
   "endpoints": {
+    "/identifiers/count": {
+      "get": {
+        "js_module": "endpoints/identifier/count.js",
+        "js_function": "count",
+        "forwarding_required": "always",
+        "authn_policies": ["member_signature"],
+        "mode": "readonly",
+        "openapi": {
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "text/plain": {
+                  "schema": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identifiers/create": {
       "post": {
         "js_module": "endpoints/identifier/create.js",
@@ -64,7 +87,7 @@
         "js_module": "endpoints/identifier/resolve.js",
         "js_function": "resolve",
         "forwarding_required": "always",
-        "authn_policies": [],
+        "authn_policies": ["no_auth"],
         "mode": "readonly",
         "openapi": {
           "parameters": [

@@ -1,49 +1,44 @@
-import * as ccfapp from '@microsoft/ccf-app';
-import MemberIdentifierKeys from '../../../models/MemberIdentifierKeys';
+import { Request, Response } from '@microsoft/ccf-app';
+import { 
+  IdentifierNotFound, 
+  IdentifierNotProvided, 
+  KeyNotFound 
+} from '../../../errors';
+import { AuthenticatedIdentity, IdentifierStore } from '../../../models';
 
 /**
  * Exports the specified key associated with the controller
  * identifier including the private key.
- * @param {ccfapp.Request} request passed to the API.
+ * @param {Request} request passed to the API.
  */
-export function exportPrivate (request: ccfapp.Request): ccfapp.Response {
-  const controllerIdentifier: string = request.params.id;
-  const keyIdentifier: string = request.params.kid;
+export function exportPrivate (request: Request): Response {
+  // Get the authentication details of the caller
+  const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
+  const controllerIdentifier: string = decodeURIComponent(request.params.id);
+  const keyIdentifier: string = decodeURIComponent(request.params.kid);
 
   // Check an identifier has been provided and
   // if not return 400 Bad Request
   if (!controllerIdentifier) {
-    return {
-      statusCode: 400,
-      body: {
-        error: 'A controller identifier must be specified.',
-      },
-    };
+    const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
+    console.log(identifierNotProvided);
+    return identifierNotProvided.toErrorResponse();
   }
 
   // Try read the identifier from the store
-  const identifierStore = ccfapp.typedKv('member_identifier_store', ccfapp.string, ccfapp.json<MemberIdentifierKeys>());
-  const memberIdentifierKeys: MemberIdentifierKeys =  <MemberIdentifierKeys>identifierStore.get(controllerIdentifier);
-
-  if (!memberIdentifierKeys) {
-    return {
-      statusCode: 404,
-      body: {
-        error: `Specified identifier '${controllerIdentifier}' not found on the network.`,
-      },
-    };
+  const identifierKeys = new IdentifierStore().read(controllerIdentifier);
+  if (!identifierKeys) {
+    const identifierNotFound = new IdentifierNotFound(controllerIdentifier, authenticatedIdentity);
+    console.log(identifierNotFound);
+    return identifierNotFound.toErrorResponse();
   }
 
   // Get matchedKey
-  const matchedKey = memberIdentifierKeys.keyPairs.find(key => key.id === keyIdentifier);
-
+  const matchedKey = identifierKeys.getKeyById(keyIdentifier);
   if (!matchedKey) {
-    return {
-      statusCode: 404,
-      body: {
-        error: `Specified key '${keyIdentifier}' not found in member '${controllerIdentifier}' key store.`,
-      },
-    };
+    const keyNotFound = new KeyNotFound(authenticatedIdentity, controllerIdentifier, keyIdentifier);
+    console.log(keyNotFound);
+    return keyNotFound.toErrorResponse();
   }
 
   return {
