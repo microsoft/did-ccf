@@ -1,7 +1,9 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import { VerificationMethodType } from './VerificationMethodType';
 
 /**
- * Model for representing a {@link https://www.w3.org/TR/did-core/} verification
+ * @interface defining a {@link https://www.w3.org/TR/did-core/} verification
  * method.
  */
 export interface VerificationMethod {

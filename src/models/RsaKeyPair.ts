@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import * as crypto from '@microsoft/ccf-app/crypto';
 import { JsonWebKey } from '@microsoft/ccf-app/global';
 import { KeyAlgorithm } from './KeyAlgorithm';
@@ -5,7 +7,7 @@ import { KeyPair } from './KeyPair';
 import { KeyUse } from './KeyUse';
 
 /**
- * Implementation of an RSA key pair.
+ * @class extending {@link KeyPair} for an RSA key.
  */
 export class RsaKeyPair extends KeyPair {
 

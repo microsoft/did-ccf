@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import { 
     string as stringConverter, 
     typedKv as keyStore, 
@@ -7,7 +9,7 @@ import {
 import { IdentifierKeys } from './IdentifierKeys';
 
 /**
- * Class for storing and retrieiving {@link IdentifierKeys} from the
+ * @class for storing and retrieiving {@link IdentifierKeys} from the
  * network key value store.
  */
 export class IdentifierStore {

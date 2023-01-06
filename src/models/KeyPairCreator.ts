@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import { EcdsaCurve } from './EcdsaCurve';
 import { EcdsaKeyPair } from './EcdsaKeyPair';
 import { EddsaCurve } from './EddsaCurve';
@@ -8,7 +10,7 @@ import { KeyPair } from './KeyPair';
 import { KeyUse } from './KeyUse';
 
 /**
- * Factory class for creating instances of {@link KeyPair}'s.
+ * Factory @class for creating instances of {@link KeyPair}'s.
  */
 export class KeyPairCreator {
    /**

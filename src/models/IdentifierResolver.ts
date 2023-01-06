@@ -1,11 +1,12 @@
-import { IdentifierKeys } from './IdentifierKeys';
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import { IdentifierStore } from './IdentifierStore';
 import { ResolveResult } from './ResolveResult';
 
 /**
- * Generates an identifier that can be used for uniquely identifying resources.
+ * Abtsract @class for resolving identifiers.
  */
-export abstract class Identifier {
+export abstract class IdentifierResolver {
     /**
      * Looks for the specified controller identifier in the member identifier store that is
      * local to the network.

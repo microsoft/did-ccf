@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
+
 /* Export models used by the endpoints */
 export * from './models/AuthenticatedIdentity';
 export * from './models/EcdsaCurve';
@@ -7,7 +10,7 @@ export * from './models/KeyPair';
 export * from './models/RsaKeyPair';
 export * from './models/EddsaKeyPair';
 export * from './models/EcdsaKeyPair';
-export * from './models/Identifier';
+export * from './models/IdentifierResolver';
 export * from './models/IdentifierStore';
 export * from './models/KeyPairCreator';
 export * from './models/KeyState';

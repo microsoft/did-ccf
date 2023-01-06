@@ -1,7 +1,8 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import { JsonWebKey } from '@microsoft/ccf-app/global';
 import { EcdsaCurve } from './EcdsaCurve';
 import { EddsaCurve } from './EddsaCurve';
-import { Identifier } from './Identifier';
 import { KeyAlgorithm } from './KeyAlgorithm';
 import { KeyState } from './KeyState';
 import { KeyUse } from './KeyUse';
@@ -10,9 +11,9 @@ const ID_CHARACTERS: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvw
 const ID_LENGTH: number = 12;
 
 /**
- * Base implementation for holding key pairs.
+ * Abstract @class for defining a model for key pairs.
  */
-export abstract class KeyPair implements KeyPair {
+export abstract class KeyPair {
     /**
      * The id for the key pair.
      */

@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import {
   AuthnIdentity,
   JwtAuthnIdentity,
@@ -10,7 +12,7 @@ import {
 const UNAUTHENTICATED: string = 'Unauthenticated';
 
 /**
- * Class for wrapping the CCF {@link AuthnIdentity} class.
+ * @class for wrapping the CCF {@link AuthnIdentity} class.
  */
 export class AuthenticatedIdentity {
   /**

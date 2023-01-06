@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import { AuthenticatedIdentity } from "./AuthenticatedIdentity";
 import { ControllerDocument } from "./ControllerDocument";
 import { KeyPair } from "./KeyPair";
@@ -5,8 +7,7 @@ import { KeyState } from "./KeyState";
 import { KeyUse } from "./KeyUse";
 
 /**
- * Model for representing a members identifier keys
- * in PEM format.
+ * @class for mapping identifiers and {@link KeyPair}'s.
  */
  export class IdentifierKeys {
     /**

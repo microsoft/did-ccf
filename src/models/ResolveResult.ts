@@ -1,7 +1,9 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import { ControllerDocument } from "./ControllerDocument";
 
 /**
-* Interface defining the result of a resovle request.
+* @interface defining the result of a resovle request.
 */
 export  interface ResolveResult {
 /**

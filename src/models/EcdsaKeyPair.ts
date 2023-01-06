@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import * as crypto from '@microsoft/ccf-app/crypto';
 import { JsonWebKey } from '@microsoft/ccf-app/global';
 import { EcdsaCurve } from '../models/EcdsaCurve'; 
@@ -6,7 +8,7 @@ import { KeyPair } from '../models/KeyPair';
 import { KeyUse } from './KeyUse';
 
 /**
- * Implementation of an ECDSA key pair.
+ * @class extending {@link KeyPair} for an ECDSA key.
  */
 export class EcdsaKeyPair extends KeyPair {
 

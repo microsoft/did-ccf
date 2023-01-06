@@ -1,7 +1,9 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import * as crypto from '@microsoft/ccf-app/crypto';
 
 /**
- * Interface defining the structure of a signed payload.
+ * @interface defining the structure of a signed payload.
  */
 export interface SignedPayload {
     /**

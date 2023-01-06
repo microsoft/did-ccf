@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import { digest } from '@microsoft/ccf-app/crypto';
 import { 
   Request, 

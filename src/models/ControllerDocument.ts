@@ -1,8 +1,10 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import { VerificationMethod } from './VerificationMethod';
 import { VerificationMethodRelationship } from './VerificationMethodRelationship'; 
     
 /**
- * Model for representing a {@link https://www.w3.org/TR/did-core/} controller document.
+ * @class for representing a {@link https://www.w3.org/TR/did-core/} controller document.
  */
 export class ControllerDocument {
 

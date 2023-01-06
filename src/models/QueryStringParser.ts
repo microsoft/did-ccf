@@ -1,5 +1,8 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
+
 /**
- * Class for parsing parameters specified on the query string.
+ * @class for parsing parameters specified on the query string.
  */
 export class QueryStringParser {
 
