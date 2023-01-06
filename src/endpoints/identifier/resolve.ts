@@ -1,6 +1,8 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
 import { Request, Response } from '@microsoft/ccf-app';
-import { IdentifierNotFound, IdentifierNotProvided, } from '../../errors';
-import { AuthenticatedIdentity, Identifier } from '../../models';
+import { IdentifierNotFound } from '../../errors';
+import { AuthenticatedIdentity, IdentifierResolver } from '../../models';
 
 /**
  * Resolves the specified decentralized identifier.
@@ -12,7 +14,7 @@ export function resolve (request: Request): Response<any> {
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
   const controllerIdentifier = decodeURIComponent(request.params.id);
 
-  const resolveResult = Identifier.resolveLocal(controllerIdentifier);
+  const resolveResult = IdentifierResolver.resolveLocal(controllerIdentifier);
   if (!resolveResult.found) {
     const identifierNotFound = new IdentifierNotFound(controllerIdentifier, authenticatedIdentity);
     console.log(identifierNotFound);
@@ -21,6 +23,6 @@ export function resolve (request: Request): Response<any> {
 
   return {
     statusCode: 200,
-    body: resolveResult.controllerDocument
+    body: resolveResult.controllerDocument,
   };
 }

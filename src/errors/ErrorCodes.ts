@@ -1,5 +1,8 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
+
 /**
- * @enum {string} defining error codes.
+ * Enumeration defining error codes.
  */
 export enum ErrorCodes {
   /**
@@ -35,8 +38,8 @@ export enum ErrorCodes {
    * identifier.
    */
   InvalidController = 'request.invalid_controller',
-  
- /**
+
+  /**
    * Indicates that an identifier does not have the specified
    * key in it's key list.
    */
@@ -52,5 +55,5 @@ export enum ErrorCodes {
    * Indicates that no siganture has been provided in the
    * request.
    */
-  SignatureNotProvided = 'request.signature_not_provided'
+  SignatureNotProvided = 'request.signature_not_provided',
 }
