@@ -10,12 +10,12 @@ import { IdentifierStore } from '../../models';
  */
 export function count (request: Request): Response {
   // Use the size of the key value store to determine the number
-  // of identifiers in the network. Each entry equates a single identifier. 
+  // of identifiers in the network. Each entry equates a single identifier.
   const count = new IdentifierStore().count();
 
   // Return 200 and the count.
   return {
     statusCode: 200,
-    body: count
+    body: count,
   };
 }

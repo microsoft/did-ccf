@@ -1,24 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
-import { digest } from '@microsoft/ccf-app/crypto';
-import { 
-  Request, 
+import {
+  Request,
   Response,
-  string as stringConverter 
+  string as stringConverter,
 } from '@microsoft/ccf-app';
+import { digest } from '@microsoft/ccf-app/crypto';
 import { Base64 } from 'js-base64';
-import { 
+import {
   AuthenticatedIdentity,
   ControllerDocument,
   EcdsaCurve,
+  IdentifierKeys,
+  IdentifierStore,
   KeyAlgorithm,
   KeyPair,
   KeyPairCreator,
-  IdentifierStore,
   QueryStringParser,
   VerificationMethodRelationship,
   VerificationMethodType,
-  IdentifierKeys,
  } from '../../models';
 
 /**
@@ -50,7 +50,7 @@ export function create (request: Request): Response {
   // Create the identifier for the document based on the public key digest
   const identifier = `did:ccf:${request.hostname}:${publicKeyDigestBase64Url}`;
   const controllerDocument = new ControllerDocument(identifier);
-  
+
   // Add the signing key
   controllerDocument.addVerificationMethod({
     id: signingKeyPair.id,
@@ -70,11 +70,11 @@ export function create (request: Request): Response {
   // Now store the keys in the key value store using the
   // digest as the identifier
   new IdentifierStore().addOrUpdate(
-    publicKeyDigestBase64Url, 
+    publicKeyDigestBase64Url,
     <IdentifierKeys> {
-      memberId: authenticatedIdentity.identifier, 
-      controllerDocument: controllerDocument, 
-      keyPairs: [ signingKeyPair, encryptionKeyPair ]
+      memberId: authenticatedIdentity.identifier,
+      controllerDocument,
+      keyPairs: [signingKeyPair, encryptionKeyPair],
     });
 
   console.log(`Identifier '${identifier}' created for member '${authenticatedIdentity.identifier}'.`);
@@ -82,6 +82,6 @@ export function create (request: Request): Response {
   // Return 201 and the controller document representing the newly created identifier.
   return {
     statusCode: 201,
-    body: controllerDocument
+    body: controllerDocument,
   };
 }

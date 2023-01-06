@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
+import { AuthenticatedIdentity } from '../models/AuthenticatedIdentity';
 import { AuthenticatedRequestError } from './AuthenticatedRequestError';
 import { ErrorCodes } from './ErrorCodes';
-import { AuthenticatedIdentity } from '../models/AuthenticatedIdentity';
 
 /**
  * Error for indicating that a specified key was not found in the
@@ -17,10 +17,9 @@ export class KeyNotFound extends AuthenticatedRequestError {
    */
   constructor (public authenticatedIdentity: AuthenticatedIdentity, public identifier: string, public keyIdentifier: string) {
     super(
-      authenticatedIdentity, 
-      ErrorCodes.KeyNotFound, 
+      authenticatedIdentity,
+      ErrorCodes.KeyNotFound,
       `User/Member '${authenticatedIdentity.identifier}' has tried to perform a key operation on key '${keyIdentifier}', but the key does not exist in identifiers '${identifier}' keys.`,
       400);
   }
 }
-  

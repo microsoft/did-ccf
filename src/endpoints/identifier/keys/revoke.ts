@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
 import { Request, Response } from '@microsoft/ccf-app';
-import { 
-  IdentifierNotFound, 
-  IdentifierNotProvided, 
-  KeyNotFound 
+import {
+  IdentifierNotFound,
+  IdentifierNotProvided,
+  KeyNotFound,
 } from '../../../errors';
 import {
   AuthenticatedIdentity,
-  KeyState, 
-  IdentifierStore, 
-  VerificationMethodRelationship 
+  IdentifierStore,
+  KeyState,
+  VerificationMethodRelationship,
 } from '../../../models';
 
 /**
@@ -23,7 +23,7 @@ export function revoke (request: Request): Response {
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
   const controllerIdentifier: string = decodeURIComponent(request.params.id);
   const keyIdentifier: string = decodeURIComponent(request.params.kid);
-  
+
   // Check an identifier has been provided and
   // if not return 400 Bad Request
   if (!controllerIdentifier) {
@@ -58,22 +58,23 @@ export function revoke (request: Request): Response {
   delete matchedKey.privateKey;
 
   // Remove the method from the verification methods array
-  identifierKeys.controllerDocument.verificationMethod = identifierKeys.controllerDocument.verificationMethod.filter(verificationMethod => verificationMethod.id !== keyIdentifier);
+  let verificationMethod = identifierKeys.controllerDocument.verificationMethod;
+  verificationMethod = verificationMethod.filter(verificationMethod => verificationMethod.id !== keyIdentifier);
 
-  // Now remove from any references from relationships. Use the 
+  // Now remove from any references from relationships. Use the
   // enum values since the document relationships begin lower case.
   Object.values(VerificationMethodRelationship).forEach(relationship => {
-    if (identifierKeys.controllerDocument.hasOwnProperty(relationship)){
+    if (identifierKeys.controllerDocument.hasOwnProperty(relationship)) {
       identifierKeys.controllerDocument[relationship] = identifierKeys.controllerDocument[relationship].filter(reference => reference !== keyIdentifier);
     }
   });
-  
+
   // Store the updated controller document and identifier keys
   identifierStore.addOrUpdate(controllerIdentifier, identifierKeys);
-  
+
   // Return 201 and the controller document representing the updated controller document.
   return {
     statusCode: 200,
-    body: identifierKeys.controllerDocument
+    body: identifierKeys.controllerDocument,
   };
 }

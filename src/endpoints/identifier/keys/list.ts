@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
-import { Request, Response} from '@microsoft/ccf-app';
+import { Request, Response } from '@microsoft/ccf-app';
 import { IdentifierNotFound, IdentifierNotProvided } from '../../../errors';
 import {
   AuthenticatedIdentity,
-  IdentifierStore
+  IdentifierStore,
 } from '../../../models';
 
 /**
@@ -15,7 +15,7 @@ export function list (request: Request): Response {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
   const controllerIdentifier: string = decodeURIComponent(request.params.id);
-  
+
   // Check an identifier has been provided and
   // if not return 400 Bad Request
   if (!controllerIdentifier) {
@@ -34,15 +34,15 @@ export function list (request: Request): Response {
 
   // Remove the private keys from the collection before
   // returning id, public key and state
-  const keys = identifierKeys.keyPairs.map<any>(keyPair => { 
-      let {privateKey, ...redactedKey} = keyPair;
-      return redactedKey;
+  const keys = identifierKeys.keyPairs.map<any>(keyPair => {
+    const { privateKey, ...redactedKey } = keyPair;
+    return redactedKey;
   });
 
   return {
     statusCode: 200,
     body: {
-        keys: keys
-    }
-  }
+      keys,
+    },
+  };
 }

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
+import { AuthenticatedIdentity } from '../models/AuthenticatedIdentity';
 import { AuthenticatedRequestError } from './AuthenticatedRequestError';
 import { ErrorCodes } from './ErrorCodes';
-import { AuthenticatedIdentity } from '../models/AuthenticatedIdentity';
 
 /**
  * Error for indicating that an attempted indetifier operation is being executed
@@ -15,8 +15,8 @@ export class InvalidController extends AuthenticatedRequestError {
    */
   constructor (public authenticatedIdentity: AuthenticatedIdentity) {
     super(
-      authenticatedIdentity, 
-      ErrorCodes.InvalidController, 
+      authenticatedIdentity,
+      ErrorCodes.InvalidController,
       `User/Member '${authenticatedIdentity.identifier}' attempted an operation on an identifier that is not under their control.`,
       400);
   }

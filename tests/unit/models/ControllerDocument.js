@@ -1,4 +1,6 @@
-import ControllerDocument from '../../../dist/src/models/ControllerDocument.js';
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
+import { ControllerDocument } from '../../../dist/src/models/ControllerDocument.js';
 import { VerificationMethodType } from '../../../dist/src/models/VerificationMethodType.js';
 import { VerificationMethodRelationship } from '../../../dist/src/models/VerificationMethodRelationship.js';
 

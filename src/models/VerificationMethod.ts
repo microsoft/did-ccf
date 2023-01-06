@@ -3,28 +3,28 @@
 import { VerificationMethodType } from './VerificationMethodType';
 
 /**
- * @interface defining a {@link https://www.w3.org/TR/did-core/} verification
+ * An interface defining a {@link https://www.w3.org/TR/did-core/} verification
  * method.
  */
 export interface VerificationMethod {
     /**
      * The id for the verification method
      */
-    id: string;
+  id: string;
 
     /**
      * The controller of the verification method. Defaults
      * to the {@link DidDocument.id } if not specified.
      */
-    controller?: string;
+  controller?: string;
 
     /**
      * The {@link VerificationMethodType}.
      */
-    type: VerificationMethodType;
+  type: VerificationMethodType;
 
     /**
      * The public key in Json Web Key (JWK) format.
      */
-    publicKeyJwk: any;
+  publicKeyJwk: any;
 }

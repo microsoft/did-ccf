@@ -2,7 +2,7 @@
 // Licensed under the Apache 2.0 License.
 
 /**
- * @enum of key use.
+ * Enumeration of key use.
  */
 export enum KeyUse {
     /**
@@ -13,5 +13,5 @@ export enum KeyUse {
     /**
      * Key can be used for signing.
      */
-    Signing = 'sig'
+    Signing = 'sig',
 }

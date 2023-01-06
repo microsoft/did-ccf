@@ -2,9 +2,9 @@
 // Licensed under the Apache 2.0 License.
 
 /**
- * @enum of EDDSA curves.
+ * Enumeration of EDDSA curves.
  */
- export enum EddsaCurve {
+export enum EddsaCurve {
     /**
      * Curve offering 128-bit security using a 256-bit key size.
      */

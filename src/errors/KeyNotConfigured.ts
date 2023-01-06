@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
-import { AuthenticatedRequestError } from './AuthenticatedRequestError';
-import { AuthenticatedIdentity} from '../models/AuthenticatedIdentity'
-import { ErrorCodes } from './ErrorCodes';
 import { KeyUse } from '../models';
+import { AuthenticatedIdentity } from '../models/AuthenticatedIdentity';
+import { AuthenticatedRequestError } from './AuthenticatedRequestError';
+import { ErrorCodes } from './ErrorCodes';
 
 /**
  * Error for indicating that an identifier does not have
@@ -18,9 +18,8 @@ export class KeyNotConfigured extends AuthenticatedRequestError {
    */
   constructor (public authenticatedIdentity: AuthenticatedIdentity, public identifier: string, public use: KeyUse = KeyUse.Signing) {
     super(
-      authenticatedIdentity, 
-      ErrorCodes.SigningKeyNotConfigured, 
+      authenticatedIdentity,
+      ErrorCodes.SigningKeyNotConfigured,
       `User/Member '${authenticatedIdentity.identity}' is attempting to use identifier '${identifier}' that does have a current key '${use}' configured.`);
   }
 }
-  

@@ -2,9 +2,9 @@
 // Licensed under the Apache 2.0 License.
 
 /**
- * @enum of key algorithms.
+ * Enumeration of key algorithms.
  */
- export enum KeyAlgorithm {
+export enum KeyAlgorithm {
     /**
      * RSA Algorithm.
      */

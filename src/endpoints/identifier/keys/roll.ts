@@ -1,26 +1,26 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
 import { Request, Response } from '@microsoft/ccf-app';
-import { 
-  IdentifierNotFound, 
-  IdentifierNotProvided, 
+import {
+  IdentifierNotFound,
+  IdentifierNotProvided,
   InvalidController,
-  KeyNotConfigured
+  KeyNotConfigured,
 } from '../../../errors';
 import {
-  AuthenticatedIdentity, 
-  ControllerDocument, 
+  AuthenticatedIdentity,
+  ControllerDocument,
   EcdsaCurve,
   EddsaCurve,
   IdentifierStore,
-  KeyAlgorithm, 
+  KeyAlgorithm,
   KeyPair,
   KeyPairCreator,
   KeyState,
   KeyUse,
   QueryStringParser,
   VerificationMethodRelationship,
-  VerificationMethodType
+  VerificationMethodType,
 } from '../../../models';
 
 /**
@@ -28,17 +28,17 @@ import {
  * identifier using the existing key algorihtm as the
  * algorithm. The request querystring paramtere
  * @param {Request} request passed to the API.
- * 
+ *
  * @description The following optional query string parameters
  * can be provided in the request:
- * 
+ *
  *    @param {KeyAlgorithm} alg specifying the key algorithm to use.
  *    @param {number} size specifying the key size.
  *    @param {EcdsaCurve} curve specifying the key size.
  *    @param {KeyUse} use specifying the key use.
  */
 
-export function roll(request: Request): Response {
+export function roll (request: Request): Response {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
   const controllerIdentifier: string = decodeURIComponent(request.params.id);
@@ -56,7 +56,7 @@ export function roll(request: Request): Response {
   }
 
   // Try read the identifier from the store
-  const identifierStore = new IdentifierStore()
+  const identifierStore = new IdentifierStore();
 
   // Try read the identifier from the store
   const identifierKeys = identifierStore.read(controllerIdentifier);
@@ -75,11 +75,11 @@ export function roll(request: Request): Response {
   }
 
   // Get the current key for the specified use from the members keys then
-  // 1. Get the current key, check if the same key type is being generated as part of the roll. If there 
+  // 1. Get the current key, check if the same key type is being generated as part of the roll. If there
   // is no current key todays behaviour is to throw, but perhaps it should just create a new key (could
   // be enabled by a query parameter?).
   // 2. Generate the new key.
-  // 3. Update the current key state to historical. 
+  // 3. Update the current key state to historical.
   // 4. Remove the current key's private key.
   const currentKey = identifierKeys.getCurrentKey(keyUse);
 
@@ -111,13 +111,17 @@ export function roll(request: Request): Response {
   // Add the new verification method to the controller document
   // and then update the store
   const controllerDocument = Object.setPrototypeOf(identifierKeys.controllerDocument, ControllerDocument.prototype);
-  const verificationMethodRelationship = keyUse === KeyUse.Signing ? VerificationMethodRelationship.Authentication : VerificationMethodRelationship.KeyAgreement;
+  const verificationMethodRelationship =
+    keyUse === KeyUse.Signing ?
+    VerificationMethodRelationship.Authentication :
+    VerificationMethodRelationship.KeyAgreement;
+
   controllerDocument.addVerificationMethod({
     id: newKey.id,
     controller: identifierKeys.controllerDocument.id,
     type: VerificationMethodType.JsonWebKey2020,
     publicKeyJwk: newKey.asJwk(false),
-  }, [ verificationMethodRelationship ]);
+  }, [verificationMethodRelationship]);
 
   // Store the new identifier
   identifierStore.addOrUpdate(controllerIdentifier, identifierKeys);

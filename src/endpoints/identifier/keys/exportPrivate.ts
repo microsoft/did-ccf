@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
 import { Request, Response } from '@microsoft/ccf-app';
-import { 
-  IdentifierNotFound, 
-  IdentifierNotProvided, 
-  KeyNotFound 
+import {
+  IdentifierNotFound,
+  IdentifierNotProvided,
+  KeyNotFound,
 } from '../../../errors';
 import { AuthenticatedIdentity, IdentifierStore } from '../../../models';
 
@@ -45,6 +45,6 @@ export function exportPrivate (request: Request): Response {
 
   return {
     statusCode: 200,
-    body: matchedKey
-  }
+    body: matchedKey,
+  };
 }

@@ -2,9 +2,9 @@
 // Licensed under the Apache 2.0 License.
 
 /**
- * @enum of ECDSA curves.
+ * Enumeration of ECDSA curves.
  */
- export enum EcdsaCurve {
+export enum EcdsaCurve {
     /**
      * 256 bit using random curve.
      */

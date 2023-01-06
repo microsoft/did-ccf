@@ -23,6 +23,6 @@ export function resolve (request: Request): Response<any> {
 
   return {
     statusCode: 200,
-    body: resolveResult.controllerDocument
+    body: resolveResult.controllerDocument,
   };
 }
