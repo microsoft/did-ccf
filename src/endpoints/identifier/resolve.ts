@@ -12,11 +12,11 @@ import { AuthenticatedIdentity, IdentifierResolver } from '../../models';
 export function resolve (request: Request): Response<any> {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const controllerIdentifier = decodeURIComponent(request.params.id);
+  const identifierId = decodeURIComponent(request.params.id);
 
-  const resolveResult = IdentifierResolver.resolveLocal(controllerIdentifier);
+  const resolveResult = IdentifierResolver.resolveLocal(identifierId);
   if (!resolveResult.found) {
-    const identifierNotFound = new IdentifierNotFound(controllerIdentifier, authenticatedIdentity);
+    const identifierNotFound = new IdentifierNotFound(identifierId, authenticatedIdentity);
     console.log(identifierNotFound);
     return identifierNotFound.toErrorResponse();
   }

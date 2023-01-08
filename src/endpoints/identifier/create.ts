@@ -11,7 +11,7 @@ import {
   AuthenticatedIdentity,
   ControllerDocument,
   EcdsaCurve,
-  IdentifierKeys,
+  Identifier,
   IdentifierStore,
   KeyAlgorithm,
   KeyPair,
@@ -70,9 +70,9 @@ export function create (request: Request): Response {
   // Now store the keys in the key value store using the
   // digest as the identifier
   new IdentifierStore().addOrUpdate(
-    publicKeyDigestBase64Url,
-    <IdentifierKeys> {
-      memberId: authenticatedIdentity.identifier,
+    <Identifier> {
+      id: publicKeyDigestBase64Url,
+      controller: authenticatedIdentity.identifier,
       controllerDocument,
       keyPairs: [signingKeyPair, encryptionKeyPair],
     });

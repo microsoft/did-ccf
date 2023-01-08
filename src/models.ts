@@ -21,5 +21,5 @@ export * from './models/VerificationMethod';
 export * from './models/VerificationMethodRelationship';
 export * from './models/VerificationMethodType';
 export * from './models/ControllerDocument';
-export * from './models/IdentifierKeys';
+export * from './models/Identifier';
 export * from './models/QueryStringParser';

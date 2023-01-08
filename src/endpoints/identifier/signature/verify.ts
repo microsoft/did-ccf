@@ -34,21 +34,21 @@ import {
  * @returns HTTP 200 OK and a boolean indicating whether the signature is valid.
  */
 export function verify (request: Request): Response<any> {
-    // Get the authentication details of the caller
+  // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const controllerIdentifier = decodeURIComponent(request.params.id);
+  const identifierId = decodeURIComponent(request.params.id);
 
-    // Check an identifier has been provided and
-    // if not return 400 Bad Request
-  if (!controllerIdentifier) {
+  // Check an identifier has been provided and
+  // if not return 400 Bad Request
+  if (!identifierId) {
     const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
     console.log(identifierNotProvided);
     return identifierNotProvided.toErrorResponse();
   }
 
-    // Get the signature and payload from
-    // the body JSON and validate before we do any
-    // real work.
+  // Get the signature and payload from
+  // the body JSON and validate before we do any
+  // real work.
   const bodyJson = <SignedPayload>request.body.json();
   const signatureBase64 = bodyJson.signature;
   const payload = bodyJson.payload;
@@ -72,21 +72,21 @@ export function verify (request: Request): Response<any> {
     return signerIdentifierNotProvided.toErrorResponse();
   }
 
-    // Try read the identifier from the store
-  const identifierKeys = new IdentifierStore().read(controllerIdentifier);
-  if (!identifierKeys) {
-    const identifierNotFound = new IdentifierNotFound(controllerIdentifier, authenticatedIdentity);
+  // Try read the identifier from the store
+  const identifier = new IdentifierStore().read(identifierId);
+  if (!identifier) {
+    const identifierNotFound = new IdentifierNotFound(identifierId, authenticatedIdentity);
     console.log(identifierNotFound);
     return identifierNotFound.toErrorResponse();
   }
 
-    // Get the current signing key and return error if
-    // one is not returned.
-  const currentKey = identifierKeys.getCurrentKey(KeyUse.Signing);
+  // Get the current signing key and return error if
+  // one is not returned.
+  const currentKey = identifier.getCurrentKey(KeyUse.Signing);
   if (!currentKey) {
-    const keyNotConfigured = new KeyNotConfigured(authenticatedIdentity, controllerIdentifier);
-        // Send to the console as an error since this is not
-        // a client recoverable error.
+    const keyNotConfigured = new KeyNotConfigured(authenticatedIdentity, identifierId);
+    // Send to the console as an error since this is not
+    // a client recoverable error.
     console.error(keyNotConfigured);
     return keyNotConfigured.toErrorResponse();
   }
@@ -96,8 +96,8 @@ export function verify (request: Request): Response<any> {
     hash: 'SHA-256',
   };
 
-    // Encode the payload, convert the base64URL encoded
-    // signature to an array and verify signature
+  // Encode the payload, convert the base64URL encoded
+  // signature to an array and verify signature
   const signature = Base64.toUint8Array(signatureBase64);
   const isSignatureValid = verifySignature(
     signingAlgorithm,
