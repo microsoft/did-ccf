@@ -39,7 +39,7 @@ export class Identifier {
    * @returns The {@link KeyPair} for the current key.
    */
   public getCurrentKey (use: KeyUse = KeyUse.Signing): KeyPair | void {
-        // Attempt to get the current key for the identifier.
+    // Attempt to get the current key for the identifier.
     const keyPair = this.keyPairs.find(key => key.state === KeyState.Current && key.use === use);
 
     if (keyPair) {

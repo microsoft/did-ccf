@@ -10,6 +10,7 @@ import {
   AuthenticatedIdentity,
   IdentifierStore,
   KeyState,
+  RequestParser,
   VerificationMethodRelationship,
 } from '../../../models';
 
@@ -21,8 +22,9 @@ import {
 export function revoke (request: Request): Response {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const identifierId: string = decodeURIComponent(request.params.id);
-  const keyIdentifier: string = decodeURIComponent(request.params.kid);
+  const requestParser = new RequestParser(request);
+  const identifierId: string = requestParser.identifier;
+  const keyIdentifier: string = requestParser.keyIdentifier;
 
   // Check an identifier has been provided and
   // if not return 400 Bad Request

@@ -25,6 +25,7 @@ import {
     AuthenticatedIdentity,
     IdentifierStore,
     KeyUse,
+    RequestParser,
     SignedPayload,
 } from '../../../models';
 
@@ -36,7 +37,8 @@ import {
 export function verify (request: Request): Response<any> {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const identifierId = decodeURIComponent(request.params.id);
+  const requestParser = new RequestParser(request);
+  const identifierId = requestParser.identifier;
 
   // Check an identifier has been provided and
   // if not return 400 Bad Request

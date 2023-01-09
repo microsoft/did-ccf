@@ -40,6 +40,12 @@ export enum ErrorCodes {
   InvalidController = 'request.invalid_controller',
 
   /**
+   * Indicates that a specified service does not containing the expected
+   * properties.
+   */
+  InvalidService = 'request.invalid_service',
+
+  /**
    * Indicates that an identifier does not have the specified
    * key in it's key list.
    */
@@ -52,7 +58,17 @@ export enum ErrorCodes {
   PayloadNotProvided = 'request.payload_not_provided',
 
   /**
-   * Indicates that no siganture has been provided in the
+   * Indicates that a service was not provided in the request.
+   */
+  ServiceNotProvided = 'request.service_not_provided',
+
+  /**
+   * Indicates that a service identifier was not provided in the request.
+   */
+  ServiceIdentifierNotProvided = 'request.service_identifier_not_provided',
+
+  /**
+   * Indicates that no signature has been provided in the
    * request.
    */
   SignatureNotProvided = 'request.signature_not_provided',

@@ -10,6 +10,11 @@ import { KeyUse } from './KeyUse';
  * A class extending {@link KeyPair} for an RSA key.
  */
 export class RsaKeyPair extends KeyPair {
+  /**
+   * Default key size for RSA keys.
+   */
+  public static readonly DEFAULT_KEY_SIZE: number = 4096;
+
     /**
      * Constructs a new instance of the {@link RsaKeyPair} class.
      * @param {number} size of the key. Default is 4096.

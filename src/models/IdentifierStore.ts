@@ -9,7 +9,7 @@ import {
 import { Identifier } from './Identifier';
 
 /**
- * A class for storing and retrieiving {@link IdentifierKeys} from the
+ * A class for storing and retrieving {@link IdentifierKeys} from the
  * network key value store.
  */
 export class IdentifierStore {
@@ -55,6 +55,14 @@ export class IdentifierStore {
     const identifier = this.store.get(id);
 
     if (identifier) {
+      // As part of the restructuring of IdentifierKeys to Identifier,
+      // have introduced id as a top level property. Old stored identifiers
+      // will not have this top level property so check and update if
+      // that is the case.
+      if (!identifier.hasOwnProperty('id')) {
+        identifier.id = id;
+      }
+
       return Object.setPrototypeOf(identifier, Identifier.prototype);
     }
 

@@ -11,7 +11,7 @@ import { ErrorCodes } from './ErrorCodes';
 export class SignerIdentifierNotProvided extends AuthenticatedRequestError {
   /**
    * Constructs a new instance of the {@link SignerIdentifierNotProvided} class.
-   * @param {AuthenticatedIdentity} authenicatedIdentity making the request.
+   * @param {AuthenticatedIdentity} authenticatedIdentity making the request.
    */
   constructor (public authenticatedIdentity: AuthenticatedIdentity) {
     super(

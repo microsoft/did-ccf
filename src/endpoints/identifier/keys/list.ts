@@ -5,6 +5,7 @@ import { IdentifierNotFound, IdentifierNotProvided } from '../../../errors';
 import {
   AuthenticatedIdentity,
   IdentifierStore,
+  RequestParser,
 } from '../../../models';
 
 /**
@@ -14,7 +15,8 @@ import {
 export function list (request: Request): Response {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const identifierId: string = decodeURIComponent(request.params.id);
+  const requestParser = new RequestParser(request);
+  const identifierId: string = requestParser.identifier;
 
   // Check an identifier has been provided and
   // if not return 400 Bad Request
