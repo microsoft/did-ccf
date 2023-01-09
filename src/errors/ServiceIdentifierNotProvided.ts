@@ -5,19 +5,19 @@ import { AuthenticatedRequestError } from './AuthenticatedRequestError';
 import { ErrorCodes } from './ErrorCodes';
 
 /**
- * Error for indicating that a signature has not been provided
- * as part of the request.
+ * Error for indicating that a request did not include the service identifier
+ * in the path or the service identifier was white-space.
  */
-export class SignatureNotProvided extends AuthenticatedRequestError {
+export class ServiceIdentifierNotProvided extends AuthenticatedRequestError {
   /**
-   * Constructs a new instance of the {@link SignatureNotProvided} class.
+   * Constructs a new instance of the {@link ServiceIdentifierNotProvided} class.
    * @param {AuthenticatedIdentity} authenticatedIdentity making the request.
    */
   constructor (public authenticatedIdentity: AuthenticatedIdentity) {
     super(
       authenticatedIdentity,
-      ErrorCodes.SignatureNotProvided,
-      `User/Member '${authenticatedIdentity.identifier}' submitted a request that did not provide the expected signature to verify. Signature, payload and signer identifier are required.`,
+      ErrorCodes.ServiceIdentifierNotProvided,
+      `User/Member '${authenticatedIdentity.identifier}' submitted a request that did not provide service identifier in the path.`,
       400);
   }
 }

@@ -5,19 +5,18 @@ import { AuthenticatedRequestError } from './AuthenticatedRequestError';
 import { ErrorCodes } from './ErrorCodes';
 
 /**
- * Error for indicating that a signature has not been provided
- * as part of the request.
+ * Error for indicating that a {@link Service} was not provided in the request.
  */
-export class SignatureNotProvided extends AuthenticatedRequestError {
+export class ServiceNotProvided extends AuthenticatedRequestError {
   /**
-   * Constructs a new instance of the {@link SignatureNotProvided} class.
+   * Constructs a new instance of the {@link ServiceNotProvided} class.
    * @param {AuthenticatedIdentity} authenticatedIdentity making the request.
    */
   constructor (public authenticatedIdentity: AuthenticatedIdentity) {
     super(
       authenticatedIdentity,
-      ErrorCodes.SignatureNotProvided,
-      `User/Member '${authenticatedIdentity.identifier}' submitted a request that did not provide the expected signature to verify. Signature, payload and signer identifier are required.`,
+      ErrorCodes.InvalidService,
+      `User/Member '${authenticatedIdentity.identifier}' submitted a request that did not provide the expected service. See https://www.w3.org/TR/did-core/#services.`,
       400);
   }
 }

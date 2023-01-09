@@ -18,15 +18,16 @@ import {
   KeyPairCreator,
   KeyState,
   KeyUse,
-  QueryStringParser,
+  RequestParameters,
+  RequestParser,
   VerificationMethodRelationship,
   VerificationMethodType,
 } from '../../../models';
 
 /**
  * Rolls the current key pair associated with the controller
- * identifier using the existing key algorihtm as the
- * algorithm. The request querystring paramtere
+ * identifier using the existing key algorithm as the
+ * algorithm. The request querystring parameter
  * @param {Request} request passed to the API.
  *
  * @description The following optional query string parameters
@@ -41,15 +42,15 @@ import {
 export function roll (request: Request): Response {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const controllerIdentifier: string = decodeURIComponent(request.params.id);
-  const queryParams = new QueryStringParser(request.query);
+  const requestParser = new RequestParser(request);
+  const identifierId: string = requestParser.identifier;
 
   // Get the optional parameters from the request
-  const keyUse: KeyUse = <KeyUse>queryParams['use'] || KeyUse.Signing;
+  const keyUse = requestParser.getQueryParameter<KeyUse>('use', KeyUse.Signing);
 
   // Check an identifier has been provided and
   // if not return 400 Bad Request
-  if (!controllerIdentifier) {
+  if (!identifierId) {
     const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
     console.log(identifierNotProvided);
     return identifierNotProvided.toErrorResponse();
@@ -59,16 +60,16 @@ export function roll (request: Request): Response {
   const identifierStore = new IdentifierStore();
 
   // Try read the identifier from the store
-  const identifierKeys = identifierStore.read(controllerIdentifier);
-  if (!identifierKeys) {
-    const identifierNotFound = new IdentifierNotFound(controllerIdentifier, authenticatedIdentity);
+  const identifier = identifierStore.read(identifierId);
+  if (!identifier) {
+    const identifierNotFound = new IdentifierNotFound(identifierId, authenticatedIdentity);
     console.log(identifierNotFound);
     return identifierNotFound.toErrorResponse();
   }
 
   // Check that the member is the controller of the
   // identifier.
-  if (!identifierKeys.isController(authenticatedIdentity)) {
+  if (!identifier.isController(authenticatedIdentity)) {
     const invalidController = new InvalidController(authenticatedIdentity);
     console.log(invalidController);
     return invalidController.toErrorResponse();
@@ -76,27 +77,27 @@ export function roll (request: Request): Response {
 
   // Get the current key for the specified use from the members keys then
   // 1. Get the current key, check if the same key type is being generated as part of the roll. If there
-  // is no current key todays behaviour is to throw, but perhaps it should just create a new key (could
+  // is no current key todays behavior is to throw, but perhaps it should just create a new key (could
   // be enabled by a query parameter?).
   // 2. Generate the new key.
   // 3. Update the current key state to historical.
   // 4. Remove the current key's private key.
-  const currentKey = identifierKeys.getCurrentKey(keyUse);
+  const currentKey = identifier.getCurrentKey(keyUse);
 
   if (!currentKey) {
-    const keyNotConfigured = new KeyNotConfigured(authenticatedIdentity, controllerIdentifier, keyUse);
+    const keyNotConfigured = new KeyNotConfigured(authenticatedIdentity, identifierId, keyUse);
     // Send to the console as an error since this is not a client recoverable error.
     console.error(keyNotConfigured);
     return keyNotConfigured.toErrorResponse();
   }
 
-  // We have macthed an identifier, so let's parse the
+  // We have matched an identifier, so let's parse the
   // query string to see if any alg and curve params
   // have been specified. If not just use the properties
   // of the existing key.
-  const algorithm: KeyAlgorithm = <KeyAlgorithm>queryParams['alg'] || currentKey.algorithm;
-  const size: number = Number.parseInt(queryParams['size']) || currentKey.size;
-  const curve: EcdsaCurve | EddsaCurve = <EcdsaCurve>queryParams['curve'] || currentKey?.curve;
+  const algorithm = requestParser.getQueryParameter<KeyAlgorithm>(RequestParameters.Algorithm, currentKey.algorithm);
+  const size = requestParser.getQueryParameter<number>(RequestParameters.KeySize, currentKey.size);
+  const curve = requestParser.getQueryParameter<EcdsaCurve | EddsaCurve>(RequestParameters.Curve, currentKey?.curve);
 
   // Now generate the new key
   const newKey: KeyPair = KeyPairCreator.createKey(algorithm, keyUse, size, curve);
@@ -106,11 +107,11 @@ export function roll (request: Request): Response {
   delete currentKey.privateKey;
 
   // Now add the new keys to the member
-  identifierKeys.keyPairs.push(newKey);
+  identifier.keyPairs.push(newKey);
 
   // Add the new verification method to the controller document
   // and then update the store
-  const controllerDocument = Object.setPrototypeOf(identifierKeys.controllerDocument, ControllerDocument.prototype);
+  const controllerDocument = Object.setPrototypeOf(identifier.controllerDocument, ControllerDocument.prototype);
   const verificationMethodRelationship =
     keyUse === KeyUse.Signing ?
     VerificationMethodRelationship.Authentication :
@@ -118,17 +119,17 @@ export function roll (request: Request): Response {
 
   controllerDocument.addVerificationMethod({
     id: newKey.id,
-    controller: identifierKeys.controllerDocument.id,
+    controller: identifier.controllerDocument.id,
     type: VerificationMethodType.JsonWebKey2020,
     publicKeyJwk: newKey.asJwk(false),
   }, [verificationMethodRelationship]);
 
   // Store the new identifier
-  identifierStore.addOrUpdate(controllerIdentifier, identifierKeys);
+  identifierStore.addOrUpdate(identifier);
 
   // Return 201 and the controller document representing the updated controller document.
   return {
     statusCode: 201,
-    body: identifierKeys.controllerDocument,
+    body: identifier.controllerDocument,
   };
 }

@@ -7,21 +7,21 @@ import { ResolveResult } from './ResolveResult';
  * Abtsract class for resolving identifiers.
  */
 export abstract class IdentifierResolver {
-    /**
-     * Looks for the specified controller identifier in the member identifier store that is
-     * local to the network.
-     * @param {string} [controllerIdentifier] to resolve.
-     * @returns {ResolveResult} indicating whether the specified identifier was found on the network
-     * and if so its associated controller document.
-     */
-  public static resolveLocal (controllerIdentifier: string) : ResolveResult {
+  /**
+   * Looks for the specified identifier in the identifier store that is
+   * local to the network.
+   * @param {string} id to resolve.
+   * @returns {ResolveResult} indicating whether the specified identifier was found on the network
+   * and if so its associated controller document.
+   */
+  public static resolveLocal (id: string) : ResolveResult {
         // Try read the identifier from the store
-    const identifierKeys = new IdentifierStore().read(controllerIdentifier);
+    const identifier = new IdentifierStore().read(id);
 
-    if (identifierKeys) {
+    if (identifier) {
       return {
         found: true,
-        controllerDocument: identifierKeys.controllerDocument,
+        controllerDocument: identifier.controllerDocument,
       };
     }
 

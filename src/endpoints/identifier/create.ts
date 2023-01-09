@@ -11,15 +11,17 @@ import {
   AuthenticatedIdentity,
   ControllerDocument,
   EcdsaCurve,
-  IdentifierKeys,
+  Identifier,
   IdentifierStore,
   KeyAlgorithm,
   KeyPair,
   KeyPairCreator,
-  QueryStringParser,
+  RequestParser,
+  RsaKeyPair,
   VerificationMethodRelationship,
   VerificationMethodType,
  } from '../../models';
+import { RequestParameters } from '../../models/RequestParameters';
 
 /**
  * Creates a new decentralized identifier in the scope of the member.
@@ -29,12 +31,12 @@ import {
 export function create (request: Request): Response {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const queryParams = new QueryStringParser(request.query);
+  const requestParser = new RequestParser(request);
 
   // Get the optional parameters from the request
-  const algorithm: KeyAlgorithm = <KeyAlgorithm>queryParams['alg'] || KeyAlgorithm.Eddsa;
-  const size: number = Number.parseInt(queryParams['size'] || '4096');
-  const curve: EcdsaCurve = <EcdsaCurve>queryParams['curve'] || EcdsaCurve.Secp256r1;
+  const algorithm = requestParser.getQueryParameter<KeyAlgorithm>(RequestParameters.Algorithm, KeyAlgorithm.Eddsa);
+  const size = requestParser.getQueryParameter<number>(RequestParameters.KeySize, RsaKeyPair.DEFAULT_KEY_SIZE);
+  const curve = requestParser.getQueryParameter<EcdsaCurve>(RequestParameters.Curve, EcdsaCurve.Secp256r1);
 
   console.log(`Creating identifier for member '${authenticatedIdentity.identifier}' with algorithm '${algorithm}' and curve '${curve}'`);
 
@@ -48,13 +50,13 @@ export function create (request: Request): Response {
   const publicKeyDigestBase64Url = Base64.fromUint8Array(new Uint8Array(publicKeyDigestArray), true).toString();
 
   // Create the identifier for the document based on the public key digest
-  const identifier = `did:ccf:${request.hostname}:${publicKeyDigestBase64Url}`;
-  const controllerDocument = new ControllerDocument(identifier);
+  const identifierId = `did:ccf:${request.hostname}:${publicKeyDigestBase64Url}`;
+  const controllerDocument = new ControllerDocument(identifierId);
 
   // Add the signing key
   controllerDocument.addVerificationMethod({
     id: signingKeyPair.id,
-    controller: identifier,
+    controller: identifierId,
     type: VerificationMethodType.JsonWebKey2020,
     publicKeyJwk: signingKeyPair.asJwk(false),
   }, [VerificationMethodRelationship.Authentication]);
@@ -62,7 +64,7 @@ export function create (request: Request): Response {
   // Add the encryption key
   controllerDocument.addVerificationMethod({
     id: encryptionKeyPair.id,
-    controller: identifier,
+    controller: identifierId,
     type: VerificationMethodType.JsonWebKey2020,
     publicKeyJwk: encryptionKeyPair.asJwk(false),
   }, [VerificationMethodRelationship.KeyAgreement]);
@@ -70,14 +72,14 @@ export function create (request: Request): Response {
   // Now store the keys in the key value store using the
   // digest as the identifier
   new IdentifierStore().addOrUpdate(
-    publicKeyDigestBase64Url,
-    <IdentifierKeys> {
-      memberId: authenticatedIdentity.identifier,
+    <Identifier> {
+      id: publicKeyDigestBase64Url,
+      controller: authenticatedIdentity.identifier,
       controllerDocument,
       keyPairs: [signingKeyPair, encryptionKeyPair],
     });
 
-  console.log(`Identifier '${identifier}' created for member '${authenticatedIdentity.identifier}'.`);
+  console.log(`Identifier '${identifierId}' created for member '${authenticatedIdentity.identifier}'.`);
 
   // Return 201 and the controller document representing the newly created identifier.
   return {

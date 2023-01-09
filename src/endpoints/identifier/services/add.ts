@@ -1,0 +1,86 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the Apache 2.0 License.
+import { Request, Response } from '@microsoft/ccf-app';
+import {
+  IdentifierNotFound,
+  IdentifierNotProvided,
+  InvalidServiceProperty,
+  ServiceNotProvided,
+} from '../../../errors';
+import {
+  AuthenticatedIdentity,
+  ControllerDocument,
+  IdentifierStore,
+  RequestParser,
+} from '../../../models';
+import { Service } from '../../../models/Service';
+
+/**
+ * Adds the provided service to the controller document.
+ * @param {Request} request passed to the API.
+ */
+export function add (request: Request): Response {
+  // Get the authentication details of the caller
+  const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
+  const requestParser = new RequestParser(request);
+  const identifierId: string = requestParser.identifier;
+
+  // Check an identifier has been provided and
+  // if not return 400 Bad Request
+  if (!identifierId) {
+    const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
+    console.log(identifierNotProvided);
+    return identifierNotProvided.toErrorResponse();
+  }
+
+  // Try read the identifier from the store
+  const identifierStore = new IdentifierStore();
+  const identifier = identifierStore.read(identifierId);
+  if (!identifier) {
+    const identifierNotFound = new IdentifierNotFound(identifierId, authenticatedIdentity);
+    console.log(identifierNotFound);
+    return identifierNotFound.toErrorResponse();
+  }
+
+  // Get the service JSON from the request and check that
+  // is correctly formed.
+  const service = <Service>request.body.json();
+
+  if (!service) {
+    const serviceNotProvided = new ServiceNotProvided(authenticatedIdentity);
+    console.log(serviceNotProvided);
+    return serviceNotProvided.toErrorResponse();
+  }
+
+  if (!service.id) {
+    const invalidService = new InvalidServiceProperty(authenticatedIdentity, 'id');
+    console.log(invalidService);
+    return invalidService.toErrorResponse();
+  }
+
+  if (!service.type) {
+    const invalidService = new InvalidServiceProperty(authenticatedIdentity, 'type');
+    console.log(invalidService);
+    return invalidService.toErrorResponse();
+  }
+
+  if (!service.serviceEndpoint) {
+    const invalidService = new InvalidServiceProperty(authenticatedIdentity, 'serviceEndpoint');
+    console.log(invalidService);
+    return invalidService.toErrorResponse();
+  }
+
+  // Get the controller document for the identifier and
+  // then adds or updates the service
+  const controllerDocument: ControllerDocument = Object.setPrototypeOf(identifier.controllerDocument, ControllerDocument.prototype);
+  controllerDocument.addOrUpdateService(service);
+
+  // Update the identifier and write to store
+  identifier.controllerDocument = controllerDocument;
+  identifierStore.addOrUpdate(identifier);
+
+  return {
+    statusCode: 200,
+    body: identifier.controllerDocument,
+  };
+}

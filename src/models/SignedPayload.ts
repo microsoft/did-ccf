@@ -12,7 +12,7 @@ export interface SignedPayload {
   signature: string;
 
     /**
-     * The siganded payload.
+     * The signed payload.
      */
   payload: string;
 
@@ -29,7 +29,7 @@ export interface SignedPayload {
 
     /**
      * The identifier of the key used to sign. If no key identifier is specified
-     * the default current signign key is used.
+     * the default current signing key is used.
      */
   keyIdentifier?: string;
 }

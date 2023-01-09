@@ -5,6 +5,7 @@ import { IdentifierNotFound, IdentifierNotProvided } from '../../../errors';
 import {
   AuthenticatedIdentity,
   IdentifierStore,
+  RequestParser,
 } from '../../../models';
 
 /**
@@ -14,27 +15,28 @@ import {
 export function list (request: Request): Response {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const controllerIdentifier: string = decodeURIComponent(request.params.id);
+  const requestParser = new RequestParser(request);
+  const identifierId: string = requestParser.identifier;
 
   // Check an identifier has been provided and
   // if not return 400 Bad Request
-  if (!controllerIdentifier) {
+  if (!identifierId) {
     const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
     console.log(identifierNotProvided);
     return identifierNotProvided.toErrorResponse();
   }
 
   // Try read the identifier from the store
-  const identifierKeys = new IdentifierStore().read(controllerIdentifier);
-  if (!identifierKeys) {
-    const identifierNotFound = new IdentifierNotFound(controllerIdentifier, authenticatedIdentity);
+  const identifier = new IdentifierStore().read(identifierId);
+  if (!identifier) {
+    const identifierNotFound = new IdentifierNotFound(identifierId, authenticatedIdentity);
     console.log(identifierNotFound);
     return identifierNotFound.toErrorResponse();
   }
 
   // Remove the private keys from the collection before
   // returning id, public key and state
-  const keys = identifierKeys.keyPairs.map<any>(keyPair => {
+  const keys = identifier.keyPairs.map<any>(keyPair => {
     const { privateKey, ...redactedKey } = keyPair;
     return redactedKey;
   });

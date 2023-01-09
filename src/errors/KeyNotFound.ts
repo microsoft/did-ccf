@@ -11,7 +11,7 @@ import { ErrorCodes } from './ErrorCodes';
 export class KeyNotFound extends AuthenticatedRequestError {
   /**
    * Constructs a new instance of the {@link KeyNotFound} class.
-   * @param {AuthenticatedIdentity} authenicatedIdentity making the request.
+   * @param {AuthenticatedIdentity} authenticatedIdentity making the request.
    * @param {string} identifier that does not have the specified key in it's key list.
    * @param {string} keyIdentifier that resulted in the error.
    */
