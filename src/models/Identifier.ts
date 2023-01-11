@@ -40,7 +40,7 @@ export class Identifier {
    */
   public getCurrentKey (use: KeyUse = KeyUse.Signing): KeyPair | void {
     // Attempt to get the current key for the identifier.
-    const keyPair = this.keyPairs.find(key => key.state === KeyState.Current && key.use === use);
+    const keyPair = this.keyPairs?.find(key => key.state === KeyState.Current && key.use === use);
 
     if (keyPair) {
       return Object.setPrototypeOf(keyPair, KeyPair.prototype);
@@ -55,7 +55,7 @@ export class Identifier {
    * @returns The {@link KeyPair} for the specified key.
    */
   public getKeyById (keyIdentifier: string): KeyPair | void {
-    const keyPair =  this.keyPairs.find(key => key.id === keyIdentifier);
+    const keyPair =  this.keyPairs?.find(key => key.id === keyIdentifier);
 
     if (keyPair) {
       return Object.setPrototypeOf(keyPair, KeyPair.prototype);

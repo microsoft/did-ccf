@@ -4,7 +4,7 @@ import { IdentifierStore } from './IdentifierStore';
 import { ResolveResult } from './ResolveResult';
 
 /**
- * Abtsract class for resolving identifiers.
+ * Abstract class for resolving identifiers.
  */
 export abstract class IdentifierResolver {
   /**
