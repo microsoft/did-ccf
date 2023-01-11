@@ -107,7 +107,7 @@ export class ControllerDocument {
   public removeService (id: string): void {
     // Check if the service exists and if
     // so remove from the array.
-    const existingServiceIndex = this.service.findIndex(existing => existing.id === id);
+    const existingServiceIndex = this.service?.findIndex(existing => existing.id === id);
 
     if (existingServiceIndex > -1) {
       this.service.splice(existingServiceIndex, 1);
@@ -122,6 +122,6 @@ export class ControllerDocument {
   public hasService (id: string): boolean {
     // Check if the service exists and if
     // so remove from the array.
-    return this.service.findIndex(existing => existing.id === id) > -1;
+    return this.service?.findIndex(existing => existing.id === id) > -1;
   }
 }
