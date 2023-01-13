@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
 import { Request, Response } from '@microsoft/ccf-app';
-import { IdentifierNotFound } from '../../errors';
+import { AuthenticatedRequestError } from '../../errors';
 import {
-  AuthenticatedIdentity,
   IdentifierResolver,
   RequestParser,
  } from '../../models';
@@ -14,20 +13,23 @@ import {
  * @returns HTTP 200 Created and the {@link ControllerDocument} for the identifier.
  */
 export function resolve (request: Request): Response<any> {
-  // Get the authentication details of the caller
-  const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
   const requestParser = new RequestParser(request);
   const identifierId = requestParser.identifier;
 
-  const resolveResult = IdentifierResolver.resolveLocal(identifierId);
-  if (!resolveResult.found) {
-    const identifierNotFound = new IdentifierNotFound(identifierId, authenticatedIdentity);
-    console.log(identifierNotFound);
-    return identifierNotFound.toErrorResponse();
-  }
+  try {
+    const identifier = IdentifierResolver.resolveLocal(identifierId);
 
-  return {
-    statusCode: 200,
-    body: resolveResult.controllerDocument,
-  };
+    return {
+      statusCode: 200,
+      body: identifier.controllerDocument,
+    };
+  } catch (error) {
+    if (error instanceof AuthenticatedRequestError) {
+      return (<AuthenticatedRequestError>error).toErrorResponse();
+    }
+
+    // Not derived from `AuthenticatedRequestError`
+    // so throw.
+    throw (error);
+  }
 }

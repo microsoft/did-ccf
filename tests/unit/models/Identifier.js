@@ -48,6 +48,28 @@ describe ('Identifier', () => {
                         
             expect(identifier.isController({ identifier: "controller_id"})).to.true;
         });
+
+        it ('should return false when the specified identity is not the delegated controller of the identifier', () => {
+            const identifier = new Identifier(
+                'identifier_id',
+                'controller_id',
+                new ControllerDocument('identifier_id'),
+                [],
+                'delegate_identifier');
+            
+            expect(identifier.isController({ identifier: "not_the_controller"})).to.false;
+        });
+
+        it ('should return true when the specified identity is the delegated controller of the identifier', () => {
+            const identifier = new Identifier(
+                'identifier_id',
+                'controller_id',
+                new ControllerDocument('identifier_id'),
+                [],
+                'delegate_identifier');
+                        
+            expect(identifier.isController({ identifier: "delegate_identifier"})).to.true;
+        });
     });
 
     describe ('getCurrentKey', () => {

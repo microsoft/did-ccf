@@ -2,7 +2,7 @@
 // Licensed under the Apache 2.0 License.
 import { Request, Response } from '@microsoft/ccf-app';
 import {
-  IdentifierNotFound,
+  AuthenticatedRequestError,
   IdentifierNotProvided,
   ServiceIdentifierNotProvided,
 } from '../../../errors';
@@ -39,33 +39,38 @@ export function remove (request: Request): Response {
     return serviceNotProvided.toErrorResponse();
   }
 
-  // Try read the identifier from the store
-  const identifierStore = new IdentifierStore();
-  const identifier = identifierStore.read(identifierId);
-  if (!identifier) {
-    const identifierNotFound = new IdentifierNotFound(identifierId, authenticatedIdentity);
-    console.log(identifierNotFound);
-    return identifierNotFound.toErrorResponse();
+  try {
+    // Try read the identifier from the store
+    const identifierStore = new IdentifierStore();
+    const identifier = identifierStore.read(identifierId, authenticatedIdentity);
+
+    // Get the controller document for the identifier and
+    // then removes the service. Calls to remove should be
+    // idempotent, but we don't want to incur the write
+    // cost every time. Check if the specified service exists
+    // and if so remove and update the store, otherwise
+    // just return.
+    const controllerDocument: ControllerDocument = Object.setPrototypeOf(identifier.controllerDocument, ControllerDocument.prototype);
+
+    if (controllerDocument.hasService(service)) {
+      controllerDocument.removeService(service);
+
+      // Update the identifier and update store
+      identifier.controllerDocument = controllerDocument;
+      identifierStore.addOrUpdate(identifier);
+    }
+
+    return {
+      statusCode: 200,
+      body: identifier.controllerDocument,
+    };
+  } catch (error) {
+    if (error instanceof AuthenticatedRequestError) {
+      return (<AuthenticatedRequestError>error).toErrorResponse();
+    }
+
+    // Not derived from `AuthenticatedRequestError`
+    // so throw.
+    throw (error);
   }
-
-  // Get the controller document for the identifier and
-  // then removes the service. Calls to remove should be
-  // idempotent, but we don't want to incur the write
-  // cost every time. Check if the specified service exists
-  // and if so remove and update the store, otherwise
-  // just return.
-  const controllerDocument: ControllerDocument = Object.setPrototypeOf(identifier.controllerDocument, ControllerDocument.prototype);
-
-  if (controllerDocument.hasService(service)) {
-    controllerDocument.removeService(service);
-
-    // Update the identifier and update store
-    identifier.controllerDocument = controllerDocument;
-    identifierStore.addOrUpdate(identifier);
-  }
-
-  return {
-    statusCode: 200,
-    body: identifier.controllerDocument,
-  };
 }

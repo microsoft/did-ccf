@@ -24,7 +24,7 @@ import {
 import { RequestParameters } from '../../models/RequestParameters';
 
 /**
- * Creates a new decentralized identifier in the scope of the member.
+ * Creates a new decentralized identifier in the scope of the user/member.
  * @param {Request} request containing the CCF request context.
  * @returns HTTP 201 Created and the {@link ControllerDocument} for the newly created identifier.
  */
@@ -34,6 +34,7 @@ export function create (request: Request): Response {
   const requestParser = new RequestParser(request);
 
   // Get the optional parameters from the request
+  const onBehalfOf = requestParser.getQueryParameter<string>(RequestParameters.OnBehalfOf);
   const algorithm = requestParser.getQueryParameter<KeyAlgorithm>(RequestParameters.Algorithm, KeyAlgorithm.Eddsa);
   const size = requestParser.getQueryParameter<number>(RequestParameters.KeySize, RsaKeyPair.DEFAULT_KEY_SIZE);
   const curve = requestParser.getQueryParameter<EcdsaCurve>(RequestParameters.Curve, EcdsaCurve.Secp256r1);
@@ -70,13 +71,24 @@ export function create (request: Request): Response {
   }, [VerificationMethodRelationship.KeyAgreement]);
 
   // Now store the keys in the key value store using the
-  // digest as the identifier
+  // digest as the identifier.
+  //
+  // If the request is on behalf of a user/member (which is
+  // determined by presence of the onBehalfOf parameter
+  // provided in the request), set the `controller` as the
+  // identifier provided in the onBehalfOf parameter and
+  // the `controllerDelegate` as the authenticated identity
+  // identifier making the request. If the request is not
+  // an on behalf of request, set both the `controller`
+  // and `controllerDelegate`to the authenticated identity
+  // identifier.
   new IdentifierStore().addOrUpdate(
     <Identifier> {
       id: publicKeyDigestBase64Url,
-      controller: authenticatedIdentity.identifier,
+      controller: onBehalfOf || authenticatedIdentity.identifier,
       controllerDocument,
       keyPairs: [signingKeyPair, encryptionKeyPair],
+      controllerDelegate: authenticatedIdentity.identifier,
     });
 
   console.log(`Identifier '${identifierId}' created for member '${authenticatedIdentity.identifier}'.`);

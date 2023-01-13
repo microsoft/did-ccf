@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
 import { Request, Response } from '@microsoft/ccf-app';
-import { IdentifierNotFound, IdentifierNotProvided } from '../../../errors';
+import { AuthenticatedRequestError, IdentifierNotProvided } from '../../../errors';
 import {
   AuthenticatedIdentity,
   IdentifierStore,
@@ -27,24 +27,29 @@ export function list (request: Request): Response {
   }
 
   // Try read the identifier from the store
-  const identifier = new IdentifierStore().read(identifierId);
-  if (!identifier) {
-    const identifierNotFound = new IdentifierNotFound(identifierId, authenticatedIdentity);
-    console.log(identifierNotFound);
-    return identifierNotFound.toErrorResponse();
+  try {
+    const identifier = new IdentifierStore().read(identifierId, authenticatedIdentity);
+
+    // Remove the private keys from the collection before
+    // returning id, public key and state
+    const keys = identifier.keyPairs.map<any>(keyPair => {
+      const { privateKey, ...redactedKey } = keyPair;
+      return redactedKey;
+    });
+
+    return {
+      statusCode: 200,
+      body: {
+        keys,
+      },
+    };
+  } catch (error) {
+    if (error instanceof AuthenticatedRequestError) {
+      return (<AuthenticatedRequestError>error).toErrorResponse();
+    }
+
+    // Not derived from `AuthenticatedRequestError`
+    // so throw.
+    throw (error);
   }
-
-  // Remove the private keys from the collection before
-  // returning id, public key and state
-  const keys = identifier.keyPairs.map<any>(keyPair => {
-    const { privateKey, ...redactedKey } = keyPair;
-    return redactedKey;
-  });
-
-  return {
-    statusCode: 200,
-    body: {
-      keys,
-    },
-  };
 }

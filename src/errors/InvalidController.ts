@@ -5,7 +5,7 @@ import { AuthenticatedRequestError } from './AuthenticatedRequestError';
 import { ErrorCodes } from './ErrorCodes';
 
 /**
- * Error for indicating that an attempted indetifier operation is being executed
+ * Error for indicating that an attempted identifier operation is being executed
  * by a member that is not the controller of the identifier.
  */
 export class InvalidController extends AuthenticatedRequestError {
@@ -17,7 +17,7 @@ export class InvalidController extends AuthenticatedRequestError {
     super(
       authenticatedIdentity,
       ErrorCodes.InvalidController,
-      `User/Member '${authenticatedIdentity.identifier}' attempted an operation on an identifier that is not under their control.`,
+      `User/Member '${authenticatedIdentity.identifier}' attempted an operation on an identifier that is not under their control or that they have not been delegated control over.`,
       400);
   }
 }

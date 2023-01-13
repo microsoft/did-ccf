@@ -6,32 +6,40 @@
  */
 export enum RequestParameters {
     /**
-     * Algorithm parameter.
+     * Algorithm query string parameter for specifying
+     * which {@link KeyAlgorithm} to use.
      */
     Algorithm = 'alg',
 
     /**
-     * Curve parameter.
+     * Curve query string parameter for specifying
+     * which {@link EcdsaCurve | EddsaCurve} to use.
      */
     Curve = 'curve',
 
     /**
-     * Identifier parameter.
+     * On behalf of query string parameter.
+     */
+    OnBehalfOf = 'obo',
+
+    /**
+     * Identifier path parameter.
      */
     Identifier = 'id',
 
     /**
-     * Key Identifier parameter.
+     * Key Identifier path parameter.
      */
     KeyIdentifier = 'kid',
 
     /**
-     * Key Size parameter.
+     * Key Size query string parameter for specifying
+     * which .
      */
     KeySize = 'size',
 
     /**
-     * Service identifier parameter.
+     * Service identifier path parameter.
      */
     ServiceIdentifier = 'service',
 }
