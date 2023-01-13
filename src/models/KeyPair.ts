@@ -64,7 +64,7 @@ export abstract class KeyPair {
      * @param {KeyUse} [use=KeyUse.Signing] indicating what the key can be used for.
      */
   constructor (algorithm: KeyAlgorithm, publicKey: string, privateKey: string, use: KeyUse = KeyUse.Signing) {
-    this.id = `#${KeyPair.generateId()}`;
+    this.id = KeyPair.generateId();
     this.use = use;
     this.algorithm = algorithm;
     this.publicKey = publicKey;

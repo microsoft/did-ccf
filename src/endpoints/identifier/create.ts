@@ -56,7 +56,7 @@ export function create (request: Request): Response {
 
   // Add the signing key
   controllerDocument.addVerificationMethod({
-    id: `${identifierId}${signingKeyPair.id}`,
+    id: `${identifierId}#${signingKeyPair.id}`,
     controller: identifierId,
     type: VerificationMethodType.JsonWebKey2020,
     publicKeyJwk: signingKeyPair.asJwk(false),
@@ -64,7 +64,7 @@ export function create (request: Request): Response {
 
   // Add the encryption key
   controllerDocument.addVerificationMethod({
-    id: `${identifierId}${encryptionKeyPair.id}`,
+    id: `${identifierId}#${encryptionKeyPair.id}`,
     controller: identifierId,
     type: VerificationMethodType.JsonWebKey2020,
     publicKeyJwk: encryptionKeyPair.asJwk(false),
