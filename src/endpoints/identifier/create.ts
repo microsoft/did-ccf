@@ -56,15 +56,15 @@ export function create (request: Request): Response {
 
   // Add the signing key
   controllerDocument.addVerificationMethod({
-    id: signingKeyPair.id,
+    id: `${identifierId}${signingKeyPair.id}`,
     controller: identifierId,
     type: VerificationMethodType.JsonWebKey2020,
     publicKeyJwk: signingKeyPair.asJwk(false),
-  }, [VerificationMethodRelationship.Authentication]);
+  }, [VerificationMethodRelationship.Authentication, VerificationMethodRelationship.AssertionMethod]);
 
   // Add the encryption key
   controllerDocument.addVerificationMethod({
-    id: encryptionKeyPair.id,
+    id: `${identifierId}${encryptionKeyPair.id}`,
     controller: identifierId,
     type: VerificationMethodType.JsonWebKey2020,
     publicKeyJwk: encryptionKeyPair.asJwk(false),

@@ -36,6 +36,7 @@ export class ControllerDocument {
         // the identifier as the @base.
     this['@context'] =  [
       'https://www.w3.org/ns/did/v1',
+      'https://w3id.org/security/suites/jws-2020/v1',
       {
         '@vocab': 'https://github.com/microsoft/did-ccf/blob/main/DID_CCF.md#',
       },
