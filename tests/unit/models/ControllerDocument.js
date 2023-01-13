@@ -6,11 +6,13 @@ import { VerificationMethodRelationship } from '../../../dist/src/models/Verific
 
 import { expect } from 'chai';
 
+const EXPECTED_CONTEXT = '"@context":["https://www.w3.org/ns/did/v1","https://w3id.org/security/suites/jws-2020/v1",{"@vocab":"https://github.com/microsoft/did-ccf/blob/main/DID_CCF.md#"}]';
+
 describe ('ControllerDocument', () => {
     it ('should serialize to JSON with @context', () =>{
         const controllerDocument = new ControllerDocument('test_identifier');
         const json = JSON.stringify(controllerDocument);
-        expect(json).to.equal('{"id":"test_identifier","verificationMethod":[],"@context":["https://www.w3.org/ns/did/v1",{"@vocab":"https://github.com/microsoft/did-ccf/blob/main/DID_CCF.md#"}]}');
+        expect(json).to.equal(`{"id":"test_identifier","verificationMethod":[],${EXPECTED_CONTEXT}}`);
     });
 
     describe ('addVerificationMethod', () => {
@@ -24,7 +26,7 @@ describe ('ControllerDocument', () => {
             };
             controllerDocument.addVerificationMethod(verificationMethod);
             const json = JSON.stringify(controllerDocument);
-            expect(json).to.equal('{"id":"test_identifier","verificationMethod":[{"id":"method_identifier","controller":"test_identifier","type":"JsonWebKey2020","publicKeyJwk":{}}],"@context":["https://www.w3.org/ns/did/v1",{"@vocab":"https://github.com/microsoft/did-ccf/blob/main/DID_CCF.md#"}]}');
+            expect(json).to.equal(`{"id":"test_identifier","verificationMethod":[{"id":"method_identifier","controller":"test_identifier","type":"JsonWebKey2020","publicKeyJwk":{}}],${EXPECTED_CONTEXT}}`);
         });
 
         it ('should add verification method plus relationship and serialize to JSON', () =>{
@@ -37,7 +39,7 @@ describe ('ControllerDocument', () => {
             };
             controllerDocument.addVerificationMethod(verificationMethod, [VerificationMethodRelationship.Authentication ] )
             const json = JSON.stringify(controllerDocument);
-            expect(json).to.equal('{"id":"test_identifier","verificationMethod":[{"id":"method_identifier","controller":"test_identifier","type":"JsonWebKey2020","publicKeyJwk":{}}],"@context":["https://www.w3.org/ns/did/v1",{"@vocab":"https://github.com/microsoft/did-ccf/blob/main/DID_CCF.md#"}],"authentication":["method_identifier"]}');
+            expect(json).to.equal(`{"id":"test_identifier","verificationMethod":[{"id":"method_identifier","controller":"test_identifier","type":"JsonWebKey2020","publicKeyJwk":{}}],${EXPECTED_CONTEXT},"authentication":["method_identifier"]}`);
         });
 
         it ('should add verification relationships when provided', () =>{
@@ -71,7 +73,7 @@ describe ('ControllerDocument', () => {
             };
             controllerDocument.addOrUpdateService(service);
             const json = JSON.stringify(controllerDocument);
-            expect(json).to.equal('{"id":"test_identifier","verificationMethod":[],"@context":["https://www.w3.org/ns/did/v1",{"@vocab":"https://github.com/microsoft/did-ccf/blob/main/DID_CCF.md#"}],"service":[{"id":"service_identifier","type":"service_type","serviceEndpoint":"https://example.com"}]}');
+            expect(json).to.equal(`{"id":"test_identifier","verificationMethod":[],${EXPECTED_CONTEXT},"service":[{"id":"service_identifier","type":"service_type","serviceEndpoint":"https://example.com"}]}`);
         });
 
         it ('should add service with service map and serialize to JSON', () =>{
@@ -88,7 +90,7 @@ describe ('ControllerDocument', () => {
             };
             controllerDocument.addOrUpdateService(service);
             const json = JSON.stringify(controllerDocument);
-            expect(json).to.equal('{"id":"test_identifier","verificationMethod":[],"@context":["https://www.w3.org/ns/did/v1",{"@vocab":"https://github.com/microsoft/did-ccf/blob/main/DID_CCF.md#"}],"service":[{"id":"service_identifier","type":"service_type","serviceEndpoint":{"origins":["https://example.com"]}}]}');
+            expect(json).to.equal(`{"id":"test_identifier","verificationMethod":[],${EXPECTED_CONTEXT},"service":[{"id":"service_identifier","type":"service_type","serviceEndpoint":{"origins":["https://example.com"]}}]}`);
         });
 
         it ('should add multiple services', () =>{
