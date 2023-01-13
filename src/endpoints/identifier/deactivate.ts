@@ -2,9 +2,8 @@
 // Licensed under the Apache 2.0 License.
 import { Request, Response } from '@microsoft/ccf-app';
 import {
-    IdentifierNotFound,
+    AuthenticatedRequestError,
     IdentifierNotProvided,
-    InvalidController,
 } from '../../errors';
 import {
   AuthenticatedIdentity,
@@ -31,32 +30,26 @@ export function deactivate (request: Request): Response<any> {
     return identifierNotProvided.toErrorResponse();
   }
 
-  // Try read the identifier from the store
-  const identifierStore = new IdentifierStore();
-  const identifier = identifierStore.read(identifierId);
+  try {
+    // Try read the identifier from the store checking that
+    // the authenticated identity is the controller
+    const identifierStore = new IdentifierStore();
+    identifierStore.read(identifierId, authenticatedIdentity);
 
-  // Try read the identifier from the store
-  if (!identifier) {
-    const identifierNotFound = new IdentifierNotFound(identifierId, authenticatedIdentity);
-    console.log(identifierNotFound);
-    return identifierNotFound.toErrorResponse();
+    // Remove the controller identifier from the store. This removes
+    // the controller document and all associated keys from the store.
+    identifierStore.remove(identifierId);
+
+    return {
+      statusCode: 200,
+    };
+  } catch (error) {
+    if (error instanceof AuthenticatedRequestError) {
+      return (<AuthenticatedRequestError>error).toErrorResponse();
+    }
+
+    // Not derived from `AuthenticatedRequestError`
+    // so throw.
+    throw (error);
   }
-
-  // Check that the member is the owner of the
-  // identifier.
-  if (identifier.controller !== authenticatedIdentity.identifier) {
-    const invalidController = new InvalidController(authenticatedIdentity);
-        // Log as a warning, since this could be a legitimate client error,
-        // but monitor for security.
-    console.warn(invalidController);
-    return invalidController.toErrorResponse();
-  }
-
-  // Remove the controller identifier from the store. This removes
-  // the controller document and all associated keys from the store.
-  identifierStore.remove(identifierId);
-
-  return {
-    statusCode: 200,
-  };
 }

@@ -6,6 +6,9 @@ import {
     typedKv as keyStore,
     TypedKvMap,
 } from '@microsoft/ccf-app';
+import { IdentifierNotFound } from '../errors/IdentifierNotFound';
+import { InvalidController } from '../errors/InvalidController';
+import { AuthenticatedIdentity } from './AuthenticatedIdentity';
 import { Identifier } from './Identifier';
 
 /**
@@ -46,27 +49,44 @@ export class IdentifierStore {
 
   /**
    * Attempts to read the {@link Identifier} from the store using the
-   * specified id.
+   * specified id, checking to see if the authenticated identity
+   * is the controller of the identifier.
    * @param {string} id for the identifier being read from the store.
+   * @param {AuthenticatedIdentity} authenticatedIdentity making the request to read from the store.
+   * @param {boolean} [checkControl=true] indicating whether to check that the provided
+   * authenticated identity is the controller of the document.
    * @returns a {@link Identifier} instance for the identifier if found
    * otherwise void.
    */
-  public read (id: string) : Identifier | void {
-    const identifier = this.store.get(id);
+  public read (id: string, authenticatedIdentity: AuthenticatedIdentity, checkControl: boolean = true) : Identifier {
+    let identifier = this.store.get(id);
 
-    if (identifier) {
-      // As part of the restructuring of IdentifierKeys to Identifier,
-      // have introduced id as a top level property. Old stored identifiers
-      // will not have this top level property so check and update if
-      // that is the case.
-      if (!identifier.hasOwnProperty('id')) {
-        identifier.id = id;
-      }
-
-      return Object.setPrototypeOf(identifier, Identifier.prototype);
+    if (!identifier) {
+      const identifierNotFound = new IdentifierNotFound(id, authenticatedIdentity);
+      console.log(identifierNotFound);
+      throw identifierNotFound;
     }
 
-    return;
+    // As part of the restructuring of IdentifierKeys to Identifier,
+    // have introduced id as a top level property. Old stored identifiers
+    // will not have this top level property so check and update if
+    // that is the case.
+    if (!identifier.hasOwnProperty('id')) {
+      identifier.id = id;
+    }
+
+    identifier = Object.setPrototypeOf(identifier, Identifier.prototype);
+
+    // Now check that the authenticated identity is the controller.
+    if (checkControl && !identifier.isController(authenticatedIdentity)) {
+      const invalidController = new InvalidController(authenticatedIdentity);
+      // Log as a warning, since this could be a legitimate client error,
+      // but monitor for security.
+      console.warn(invalidController);
+      throw invalidController;
+    }
+
+    return identifier;
   }
 
   /**

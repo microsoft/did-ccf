@@ -17,8 +17,14 @@ export class Identifier {
    * @param {string} controller user/member that the keys are associated with.
    * @param {ControllerDocument} controllerDocument for the identifier.
    * @param {KeyPair[]} keyPairs for the identifier.
+   * @param {string} [controllerDelegate] user/member that control of the identifier has been delegated to.
    */
-  constructor (public id: string, public controller: string, public controllerDocument: ControllerDocument, public keyPairs: KeyPair[]) {
+  constructor (
+    public id: string,
+    public controller: string,
+    public controllerDocument: ControllerDocument,
+    public keyPairs: KeyPair[],
+    public controllerDelegate?: string) {
   }
 
   /**
@@ -29,7 +35,12 @@ export class Identifier {
    * controller of the identifier and it's keys.
    */
   public isController (authenticatedIdentity: AuthenticatedIdentity): boolean {
-    return this.controller === authenticatedIdentity.identifier;
+    // Is the authenticated identity the controller of the identifier? If
+    // not check if control has been delegated to the authenticated identity. If
+    // neither are true then return false, otherwise return true indicating that
+    // the authenticated identity is able to perform operations on the identifier.
+    return (authenticatedIdentity.identifier === this.controller ||
+            authenticatedIdentity.identifier === this.controllerDelegate);
   }
 
   /**

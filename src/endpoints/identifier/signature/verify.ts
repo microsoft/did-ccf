@@ -14,7 +14,7 @@ import {
 } from '@microsoft/ccf-app/global';
 import { Base64 } from 'js-base64';
 import {
-    IdentifierNotFound,
+    AuthenticatedRequestError,
     IdentifierNotProvided,
     KeyNotConfigured,
     PayloadNotProvided,
@@ -74,41 +74,47 @@ export function verify (request: Request): Response<any> {
     return signerIdentifierNotProvided.toErrorResponse();
   }
 
-  // Try read the identifier from the store
-  const identifier = new IdentifierStore().read(identifierId);
-  if (!identifier) {
-    const identifierNotFound = new IdentifierNotFound(identifierId, authenticatedIdentity);
-    console.log(identifierNotFound);
-    return identifierNotFound.toErrorResponse();
+  try {
+    // Once we have checked all the necessary parameters and
+    // are good, try and read the identifier from the store.
+    const identifier = new IdentifierStore().read(identifierId, authenticatedIdentity);
+
+    // Get the current signing key and return error if
+    // one is not returned.
+    const currentKey = identifier.getCurrentKey(KeyUse.Signing);
+    if (!currentKey) {
+      const keyNotConfigured = new KeyNotConfigured(authenticatedIdentity, identifierId);
+      // Send to the console as an error since this is not
+      // a client recoverable error.
+      console.error(keyNotConfigured);
+      return keyNotConfigured.toErrorResponse();
+    }
+
+    const signingAlgorithm: SigningAlgorithm = {
+      name: <AlgorithmName>currentKey.algorithm.toString(),
+      hash: 'SHA-256',
+    };
+
+    // Encode the payload, convert the base64URL encoded
+    // signature to an array and verify signature
+    const signature = Base64.toUint8Array(signatureBase64);
+    const isSignatureValid = verifySignature(
+      signingAlgorithm,
+      currentKey.publicKey,
+      signature.buffer,
+      stringConverter.encode(payload));
+
+    return {
+      statusCode: 200,
+      body: isSignatureValid,
+    };
+  } catch (error) {
+    if (error instanceof AuthenticatedRequestError) {
+      return (<AuthenticatedRequestError>error).toErrorResponse();
+    }
+
+    // Not derived from `AuthenticatedRequestError`
+    // so throw.
+    throw (error);
   }
-
-  // Get the current signing key and return error if
-  // one is not returned.
-  const currentKey = identifier.getCurrentKey(KeyUse.Signing);
-  if (!currentKey) {
-    const keyNotConfigured = new KeyNotConfigured(authenticatedIdentity, identifierId);
-    // Send to the console as an error since this is not
-    // a client recoverable error.
-    console.error(keyNotConfigured);
-    return keyNotConfigured.toErrorResponse();
-  }
-
-  const signingAlgorithm: SigningAlgorithm = {
-    name: <AlgorithmName>currentKey.algorithm.toString(),
-    hash: 'SHA-256',
-  };
-
-  // Encode the payload, convert the base64URL encoded
-  // signature to an array and verify signature
-  const signature = Base64.toUint8Array(signatureBase64);
-  const isSignatureValid = verifySignature(
-    signingAlgorithm,
-    currentKey.publicKey,
-    signature.buffer,
-    stringConverter.encode(payload));
-
-  return {
-    statusCode: 200,
-    body: isSignatureValid,
-  };
 }

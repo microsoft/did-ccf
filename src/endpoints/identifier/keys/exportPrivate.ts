@@ -2,7 +2,7 @@
 // Licensed under the Apache 2.0 License.
 import { Request, Response } from '@microsoft/ccf-app';
 import {
-  IdentifierNotFound,
+  AuthenticatedRequestError,
   IdentifierNotProvided,
   KeyNotFound,
 } from '../../../errors';
@@ -33,23 +33,28 @@ export function exportPrivate (request: Request): Response {
   }
 
   // Try read the identifier from the store
-  const identifier = new IdentifierStore().read(identifierId);
-  if (!identifier) {
-    const identifierNotFound = new IdentifierNotFound(identifierId, authenticatedIdentity);
-    console.log(identifierNotFound);
-    return identifierNotFound.toErrorResponse();
-  }
+  try {
+    const identifier = new IdentifierStore().read(identifierId, authenticatedIdentity);
 
-  // Get matchedKey
-  const matchedKey = identifier.getKeyById(keyIdentifier);
-  if (!matchedKey) {
-    const keyNotFound = new KeyNotFound(authenticatedIdentity, identifierId, keyIdentifier);
-    console.log(keyNotFound);
-    return keyNotFound.toErrorResponse();
-  }
+    // Get matchedKey
+    const matchedKey = identifier.getKeyById(keyIdentifier);
+    if (!matchedKey) {
+      const keyNotFound = new KeyNotFound(authenticatedIdentity, identifierId, keyIdentifier);
+      console.log(keyNotFound);
+      return keyNotFound.toErrorResponse();
+    }
 
-  return {
-    statusCode: 200,
-    body: matchedKey,
-  };
+    return {
+      statusCode: 200,
+      body: matchedKey,
+    };
+  } catch (error) {
+    if (error instanceof AuthenticatedRequestError) {
+      return (<AuthenticatedRequestError>error).toErrorResponse();
+    }
+
+    // Not derived from `AuthenticatedRequestError`
+    // so throw.
+    throw (error);
+  }
 }

@@ -6,7 +6,7 @@ import { ErrorCodes } from './ErrorCodes';
 
 /**
  * Standardized error class for throwing a {@link RequestError} that has
- * been made by a CCF authneticated identity.
+ * been made by a CCF authenticated identity.
  */
 export class AuthenticatedRequestError extends Error {
   /**

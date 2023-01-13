@@ -18,7 +18,6 @@ export * from './models/KeyState';
 export * from './models/KeyUse';
 export * from './models/RequestParameters';
 export * from './models/RequestParser';
-export * from './models/ResolveResult';
 export * from './models/RsaKeyPair';
 export * from './models/Service';
 export * from './models/ServiceMap';

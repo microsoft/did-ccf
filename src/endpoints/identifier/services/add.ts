@@ -2,7 +2,7 @@
 // Licensed under the Apache 2.0 License.
 import { Request, Response } from '@microsoft/ccf-app';
 import {
-  IdentifierNotFound,
+  AuthenticatedRequestError,
   IdentifierNotProvided,
   InvalidServiceProperty,
   ServiceNotProvided,
@@ -33,15 +33,6 @@ export function add (request: Request): Response {
     return identifierNotProvided.toErrorResponse();
   }
 
-  // Try read the identifier from the store
-  const identifierStore = new IdentifierStore();
-  const identifier = identifierStore.read(identifierId);
-  if (!identifier) {
-    const identifierNotFound = new IdentifierNotFound(identifierId, authenticatedIdentity);
-    console.log(identifierNotFound);
-    return identifierNotFound.toErrorResponse();
-  }
-
   // Get the service JSON from the request and check that
   // is correctly formed.
   const service = <Service>request.body.json();
@@ -70,17 +61,31 @@ export function add (request: Request): Response {
     return invalidService.toErrorResponse();
   }
 
-  // Get the controller document for the identifier and
-  // then adds or updates the service
-  const controllerDocument: ControllerDocument = Object.setPrototypeOf(identifier.controllerDocument, ControllerDocument.prototype);
-  controllerDocument.addOrUpdateService(service);
+  try {
+    // Try read the identifier from the store
+    const identifierStore = new IdentifierStore();
+    const identifier = identifierStore.read(identifierId, authenticatedIdentity);
 
-  // Update the identifier and write to store
-  identifier.controllerDocument = controllerDocument;
-  identifierStore.addOrUpdate(identifier);
+    // Get the controller document for the identifier and
+    // then adds or updates the service
+    const controllerDocument: ControllerDocument = Object.setPrototypeOf(identifier.controllerDocument, ControllerDocument.prototype);
+    controllerDocument.addOrUpdateService(service);
 
-  return {
-    statusCode: 200,
-    body: identifier.controllerDocument,
-  };
+    // Update the identifier and write to store
+    identifier.controllerDocument = controllerDocument;
+    identifierStore.addOrUpdate(identifier);
+
+    return {
+      statusCode: 200,
+      body: identifier.controllerDocument,
+    };
+  } catch (error) {
+    if (error instanceof AuthenticatedRequestError) {
+      return (<AuthenticatedRequestError>error).toErrorResponse();
+    }
+
+    // Not derived from `AuthenticatedRequestError`
+    // so throw.
+    throw (error);
+  }
 }

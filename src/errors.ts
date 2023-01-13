@@ -2,6 +2,7 @@
 // Licensed under the Apache 2.0 License.
 
 // Export errors used by the endpoints
+export * from './errors/AuthenticatedRequestError';
 export * from './errors/IdentifierNotFound';
 export * from './errors/IdentifierNotProvided';
 export * from './errors/InvalidController';

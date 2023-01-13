@@ -2,7 +2,7 @@
 // Licensed under the Apache 2.0 License.
 import { Request, Response } from '@microsoft/ccf-app';
 import {
-  IdentifierNotFound,
+  AuthenticatedRequestError,
   IdentifierNotProvided,
   KeyNotFound,
 } from '../../../errors';
@@ -34,49 +34,54 @@ export function revoke (request: Request): Response {
     return identifierNotProvided.toErrorResponse();
   }
 
-  const identifierStore = new IdentifierStore();
-
   // Try read the identifier from the store
-  const identifier = identifierStore.read(identifierId);
-  if (!identifier) {
-    const identifierNotFound = new IdentifierNotFound(identifierId, authenticatedIdentity);
-    console.log(identifierNotFound);
-    return identifierNotFound.toErrorResponse();
-  }
+  try {
+    const identifierStore = new IdentifierStore();
 
-  // Get the current key from the members keys then
-  // 1. Update the state to revoked
-  // 2. Remove the private key
-  // 3. Remove key entry from controller document
-  // Get matchedKey
-  const matchedKey = identifier.getKeyById(keyIdentifier);
-  if (!matchedKey) {
-    const keyNotFound = new KeyNotFound(authenticatedIdentity, identifierId, keyIdentifier);
-    console.log(keyNotFound);
-    return keyNotFound.toErrorResponse();
-  }
+    const identifier = identifierStore.read(identifierId, authenticatedIdentity);
 
-  matchedKey.state = KeyState.Revoked;
-  delete matchedKey.privateKey;
-
-  // Remove the method from the verification methods array
-  let verificationMethod = identifier.controllerDocument.verificationMethod;
-  verificationMethod = verificationMethod.filter(verificationMethod => verificationMethod.id !== keyIdentifier);
-
-  // Now remove from any references from relationships. Use the
-  // enum values since the document relationships begin lower case.
-  Object.values(VerificationMethodRelationship).forEach(relationship => {
-    if (identifier.controllerDocument.hasOwnProperty(relationship)) {
-      identifier.controllerDocument[relationship] = identifier.controllerDocument[relationship].filter(reference => reference !== keyIdentifier);
+    // Get the current key from the members keys then
+    // 1. Update the state to revoked
+    // 2. Remove the private key
+    // 3. Remove key entry from controller document
+    // Get matchedKey
+    const matchedKey = identifier.getKeyById(keyIdentifier);
+    if (!matchedKey) {
+      const keyNotFound = new KeyNotFound(authenticatedIdentity, identifierId, keyIdentifier);
+      console.log(keyNotFound);
+      return keyNotFound.toErrorResponse();
     }
-  });
 
-  // Store the updated controller document and identifier keys
-  identifierStore.addOrUpdate(identifier);
+    matchedKey.state = KeyState.Revoked;
+    delete matchedKey.privateKey;
 
-  // Return 201 and the controller document representing the updated controller document.
-  return {
-    statusCode: 200,
-    body: identifier.controllerDocument,
-  };
+    // Remove the method from the verification methods array
+    let verificationMethod = identifier.controllerDocument.verificationMethod;
+    verificationMethod = verificationMethod.filter(verificationMethod => verificationMethod.id !== keyIdentifier);
+
+    // Now remove from any references from relationships. Use the
+    // enum values since the document relationships begin lower case.
+    Object.values(VerificationMethodRelationship).forEach(relationship => {
+      if (identifier.controllerDocument.hasOwnProperty(relationship)) {
+        identifier.controllerDocument[relationship] = identifier.controllerDocument[relationship].filter(reference => reference !== keyIdentifier);
+      }
+    });
+
+    // Store the updated controller document and identifier keys
+    identifierStore.addOrUpdate(identifier);
+
+    // Return 201 and the controller document representing the updated controller document.
+    return {
+      statusCode: 200,
+      body: identifier.controllerDocument,
+    };
+  } catch (error) {
+    if (error instanceof AuthenticatedRequestError) {
+      return (<AuthenticatedRequestError>error).toErrorResponse();
+    }
+
+    // Not derived from `AuthenticatedRequestError`
+    // so throw.
+    throw (error);
+  }
 }
