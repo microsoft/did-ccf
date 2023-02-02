@@ -4,7 +4,7 @@
       "get": {
         "js_module": "endpoints/identifier/count.js",
         "js_function": "count",
-        "forwarding_required": "always",
+        "forwarding_required": "never",
         "authn_policies": ["member_signature"],
         "mode": "readonly",
         "openapi": {
@@ -86,7 +86,7 @@
       "get": {
         "js_module": "endpoints/identifier/resolve.js",
         "js_function": "resolve",
-        "forwarding_required": "always",
+        "forwarding_required": "never",
         "authn_policies": ["no_auth"],
         "mode": "readonly",
         "openapi": {
@@ -230,7 +230,7 @@
       "post": {
         "js_module": "endpoints/identifier/signature/sign.js",
         "js_function": "sign",
-        "forwarding_required": "always",
+        "forwarding_required": "never",
         "authn_policies": ["jwt", "member_signature"],
         "mode": "readonly",
         "openapi": {
@@ -302,7 +302,7 @@
       "post": {
         "js_module": "endpoints/identifier/signature/verify.js",
         "js_function": "verify",
-        "forwarding_required": "always",
+        "forwarding_required": "never",
         "authn_policies": ["jwt", "member_signature"],
         "mode": "readonly",
         "openapi": {
@@ -518,7 +518,7 @@
       "get": {
         "js_module": "endpoints/identifier/keys/list.js",
         "js_function": "list",
-        "forwarding_required": "always",
+        "forwarding_required": "never",
         "authn_policies": ["jwt", "member_signature"],
         "mode": "readonly",
         "openapi": {
@@ -657,7 +657,7 @@
       "get": {
         "js_module": "endpoints/identifier/keys/exportPrivate.js",
         "js_function": "exportPrivate",
-        "forwarding_required": "always",
+        "forwarding_required": "never",
         "authn_policies": ["jwt", "member_signature"],
         "mode": "readonly",
         "openapi": {
