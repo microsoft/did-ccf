@@ -82,16 +82,17 @@ export function create (request: Request): Response {
   // an on behalf of request, set both the `controller`
   // and `controllerDelegate`to the authenticated identity
   // identifier.
+  const controller = onBehalfOf || authenticatedIdentity.identifier;
   new IdentifierStore().addOrUpdate(
     <Identifier> {
       id: publicKeyDigestBase64Url,
-      controller: onBehalfOf || authenticatedIdentity.identifier,
+      controller,
       controllerDocument,
       keyPairs: [signingKeyPair, encryptionKeyPair],
       controllerDelegate: authenticatedIdentity.identifier,
     });
 
-  console.log(`Identifier '${identifierId}' created for member '${authenticatedIdentity.identifier}'.`);
+  console.log(`Identifier '${identifierId}' created for '${controller}'.`);
 
   // Return 201 and the controller document representing the newly created identifier.
   return {
