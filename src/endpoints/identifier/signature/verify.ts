@@ -77,7 +77,8 @@ export function verify (request: Request): Response<any> {
   try {
     // Once we have checked all the necessary parameters and
     // are good, try and read the identifier from the store.
-    const identifier = new IdentifierStore().read(identifierId, authenticatedIdentity);
+    const checkIsController = false;
+    const identifier = new IdentifierStore().read(identifierId, authenticatedIdentity, checkIsController);
 
     // Get the current signing key and return error if
     // one is not returned.
