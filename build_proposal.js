@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
-import { readdirSync, statSync, readFileSync, writeFileSync } from "fs";
+import { readdirSync, statSync, readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 
 const args = process.argv.slice(2);
@@ -22,6 +22,10 @@ const getAllFiles = function (dirPath, arrayOfFiles) {
 };
 
 const rootDir = args[0];
+if (!existsSync(rootDir)){
+  mkdirSync(rootDir, { recursive: true });
+}
+
 const bundlePath = "dist/bundle.json";
 const bundle = JSON.parse(readFileSync(bundlePath, "utf-8"));
 
