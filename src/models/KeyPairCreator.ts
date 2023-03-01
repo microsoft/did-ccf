@@ -20,7 +20,7 @@ export class KeyPairCreator {
     * @param {EcdsaCurve | EddsaCurve} [curve] for the key if algorithm type is {@link KeyAlgorithm.Ecdsa} or {@link KeyAlgorithm.Eddsa}.
     */
   public static createSigningKey (algorithm: KeyAlgorithm, size?: number, curve?: EcdsaCurve | EddsaCurve): KeyPair {
-    return KeyPairCreator.createKey(algorithm, KeyUse.Signing, size);
+    return KeyPairCreator.createKey(algorithm, KeyUse.Signing, size, curve);
   }
 
   /**
