@@ -15,28 +15,107 @@ This specification defines how decentralized identifiers can be generated and re
 
 ```
 did-ccf:           "did:ccf:" + account_id 
-account_id:        domain + ":" + account_address
+account_id:        domain|node_id + ":" + account_address
 domain:            [-a-zA-Z0-9\-\.]{1,253}
+node_id:           [-a-zA-Z0-9\-\.]{1,64}
 account_address:   [a-zA-Z0-9]{1,64}
 ```
-### Example
+### Examples
+#### Scoped to a node identifier (default configuration)
 ```
-did:ccf:example.com:EiClkZMDxPKqC9c
+did:ccf:entra.confidential-ledger.azure.com:EiClkZMDxPKqC9c
+```
+#### Scoped to a (registered) domain
+```
+did:ccf:example.com:Y0EI0lIbEm8nBvaWnogpg
 ```
 
 ## Domains
-`did:ccf` identifiers are scoped to _domains_, strings that identify a realm of administrative authority. A single CCF Network can handle decentralized identifiers for multiple domains.
+`did:ccf` identifiers can be scoped to _domains_, strings that identify a realm of administrative authority. A single CCF Network can handle decentralized identifiers for multiple domains.
 
 ### Registration
-Authenticated members of a consortium can register a domain in which decentralized identifiers can be created by calling the **domains/\<domain\>/register** endpoint. Any such domain should indicate one or more nodes in the Network, such that DIDs in that domain may be resolved; `did:ccf` domains are interoperable with the Domain Name System, but not restricted to it.
+Members of a consortium can register a domain in which decentralized identifiers can be created by adding a row, keyed by the domain name, to the `public:ccf.gov.did.domains` [public governance table](https://microsoft.github.io/CCF/main/audit/read_write_restrictions.html#table-namespaces), which can be accomplished via an Action in the Constitution.
 
-### Deactivation
-A previously-registered domain can be deactivated by the authenticated member of a consortium which registered the domain, by calling the **domains/\<domain\>/deactivate** endpoint.
+#### Action
+```javascript
+[
+  "add_did_domain",
+  new Action(
+    function (args) {
+      checkType(args.name, "string");
+    },
+    function (args) {
+      const name = ccf.strToBuf(args.name);
+      const table = "public:ccf.gov.did.domains";
 
-Deactivating a domain does _not_ invalidate DIDs previously created in the domain, but does prevent new DIDs from being created in the domain.
+      // If the domain is already there, do nothing
+      if (ccf.kv[table].get(name) === undefined) {
+        const domain = {name};
+        ccf.kv[table].set(name, ccf.jsonCompatibleToBuf(domain));
+      }
+    }
+  ),
+]
+```
+To invoke this action, typically one member will propose the invocation and - depending on the terms of the Constitution - and others will vote to accept.
 
-### Linkage
-DIDs created in a domain can be linked to the domain via the **domains/\<domain\>/well-known** endpoint, which returns a [Well Known DID Configuration](https://identity.foundation/.well-known/resources/did-configuration), if the domain has been registered and _not_ been deactivated.
+#### Proposal
+```sh
+./scurl.sh https://<host>/gov/proposals --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> --data-binary @add_did_domain.json -H "content-type: application/json"
+```
+##### add_did_domain.json
+```json
+{
+  "actions": [
+    {
+      "name": "add_did_domain",
+      "args": {
+        "name": "example.com"
+      }
+    }
+  ]
+}
+```
+Any such domain should indicate one or more nodes in the Network, such that DIDs in that domain may be resolved; `did:ccf` domains are interoperable with the Domain Name System, but not restricted to it.
+
+### De-registration
+Members of a consortium can de-register a previously-registered domain by removing the row keyed by the domain's name from the `public:ccf.gov.did.domains` [public governance table](https://microsoft.github.io/CCF/main/audit/read_write_restrictions.html#table-namespaces).
+#### Action
+```javascript
+[
+  "remove_did_domain",
+  new Action(
+    function (args) {
+      checkType(args.name, "string");
+    },
+    function (args) {
+      const name = ccf.strToBuf(args.name);
+      const table = "public:ccf.gov.did.domains";
+      if (ccf.kv[table].has(name)) {
+        ccf.kv[table].delete(name);
+      }
+    }
+  ),
+]
+```
+#### Proposal
+```sh
+./scurl.sh https://<host>/gov/proposals --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> --data-binary @remove_did_domain.json -H "content-type: application/json"
+```
+##### remove_did_domain.json
+```json
+{
+  "actions": [
+    {
+      "name": "remove_did_domain",
+      "args": {
+        "name": "example.com"
+      }
+    }
+  ]
+}
+```
+De-registering a domain does _not_ invalidate DIDs previously created in the domain, but does prevent new DIDs from being created in the domain.
 
 ## DID Operations
 
@@ -60,7 +139,7 @@ Supported ECDSA curves (curve):
 - secp384r1
 
 #### Domain
-A caller seeking to create a DID in a given domain can specify the domain via a parameter. If the given domain has not previously been registered in the CCF Network by an authenticated member, then the request to create a DID in the domain will be rejected.
+A caller seeking to create a DID in a given domain can specify the domain's name via the `domain` query string parameter. If the given domain has not previously been registered in the CCF Network by an authenticated member, then the request to create a DID in the domain will be rejected.
 
 If a caller does _not_ specify a domain in which to create a DID, then the DID will be created under the domain corresponding to the hostname of the node in the Network to which the caller submits the request.
 

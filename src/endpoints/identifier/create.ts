@@ -7,9 +7,11 @@ import {
 } from '@microsoft/ccf-app';
 import { digest } from '@microsoft/ccf-app/crypto';
 import { Base64 } from 'js-base64';
+import { DomainNotFound } from '../../errors';
 import {
   AuthenticatedIdentity,
   ControllerDocument,
+  Domain,
   EcdsaCurve,
   Identifier,
   IdentifierStore,
@@ -39,7 +41,19 @@ export function create (request: Request): Response {
   const size = requestParser.getQueryParameter<number>(RequestParameters.KeySize, RsaKeyPair.DEFAULT_KEY_SIZE);
   const curve = requestParser.getQueryParameter<EcdsaCurve>(RequestParameters.Curve, EcdsaCurve.Secp256r1);
 
-  console.log(`Creating identifier for member '${authenticatedIdentity.identifier}' with algorithm '${algorithm}' and curve '${curve}'`);
+  // If the caller specifies a domain, check that it is registered
+  let domain = requestParser.getQueryParameter(RequestParameters.Domain);
+  if (domain) {
+    const name = <string>domain;
+    if (!Domain.isRegistered(name)) {
+      // Bail out
+      return new DomainNotFound(name, authenticatedIdentity).toErrorResponse();
+    }
+  } else {
+    // Default to the hostname on the current node
+    domain = request.hostname;
+  }
+  console.log(`Creating identifier for member '${authenticatedIdentity.identifier}' with algorithm '${algorithm}' and curve '${curve}' in domain '${domain}`);
 
   // Generate two key pairs per identifier, one for signing
   // and one for encryption
@@ -51,7 +65,7 @@ export function create (request: Request): Response {
   const publicKeyDigestBase64Url = Base64.fromUint8Array(new Uint8Array(publicKeyDigestArray), true).toString();
 
   // Create the identifier for the document based on the public key digest
-  const identifierId = `did:ccf:${request.hostname}:${publicKeyDigestBase64Url}`;
+  const identifierId = `did:ccf:${domain}:${publicKeyDigestBase64Url}`;
   const controllerDocument = new ControllerDocument(identifierId);
 
   // Add the signing key
