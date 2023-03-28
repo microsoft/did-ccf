@@ -4,6 +4,7 @@
 // Export models used by the endpoints
 export * from './models/AuthenticatedIdentity';
 export * from './models/ControllerDocument';
+export * from './models/Domain';
 export * from './models/EcdsaCurve';
 export * from './models/EcdsaKeyPair';
 export * from './models/EddsaCurve';

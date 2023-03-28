@@ -42,4 +42,9 @@ export enum RequestParameters {
      * Service identifier path parameter.
      */
     ServiceIdentifier = 'service',
+
+    /**
+     * Domain identifier path parameter.
+     */
+    Domain = 'domain',
 }

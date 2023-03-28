@@ -15,19 +15,112 @@ This specification defines how decentralized identifiers can be generated and re
 
 ```
 did-ccf:           "did:ccf:" + account_id 
-account_id:        node_id + ":" + account_address
+account_id:        domain|node_id + ":" + account_address
+domain:            [-a-zA-Z0-9\-\.]{1,253}
 node_id:           [-a-zA-Z0-9\-\.]{1,64}
 account_address:   [a-zA-Z0-9]{1,64}
 ```
-### Example
+### Examples
+#### Scoped to a node identifier (default configuration)
 ```
 did:ccf:entra.confidential-ledger.azure.com:EiClkZMDxPKqC9c
 ```
+#### Scoped to a (registered) domain
+```
+did:ccf:example.com:Y0EI0lIbEm8nBvaWnogpg
+```
+
+## Domains
+`did:ccf` identifiers can be scoped to _domains_, strings that identify a realm of administrative authority. A single CCF Network can handle decentralized identifiers for multiple domains.
+
+### Registration
+Members of a consortium can register a domain in which decentralized identifiers can be created by adding a row, keyed by the domain name, to the `public:ccf.gov.did.domains` [public governance table](https://microsoft.github.io/CCF/main/audit/read_write_restrictions.html#table-namespaces), which can be accomplished via an Action in the Constitution.
+
+#### Action
+```javascript
+[
+  "add_did_domain",
+  new Action(
+    function (args) {
+      checkType(args.name, "string");
+    },
+    function (args) {
+      const name = ccf.strToBuf(args.name);
+      const table = "public:ccf.gov.did.domains";
+
+      // If the domain is already there, do nothing
+      if (ccf.kv[table].get(name) === undefined) {
+        const domain = {name};
+        ccf.kv[table].set(name, ccf.jsonCompatibleToBuf(domain));
+      }
+    }
+  ),
+]
+```
+To invoke this action, typically one member will propose the invocation and - depending on the terms of the Constitution - and others will vote to accept.
+
+#### Proposal
+```sh
+./scurl.sh https://<host>/gov/proposals --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> --data-binary @add_did_domain.json -H "content-type: application/json"
+```
+##### add_did_domain.json
+```json
+{
+  "actions": [
+    {
+      "name": "add_did_domain",
+      "args": {
+        "name": "example.com"
+      }
+    }
+  ]
+}
+```
+Any such domain should indicate one or more nodes in the Network, such that DIDs in that domain may be resolved; `did:ccf` domains are interoperable with the Domain Name System, but not restricted to it.
+
+### De-registration
+Members of a consortium can de-register a previously-registered domain by removing the row keyed by the domain's name from the `public:ccf.gov.did.domains` [public governance table](https://microsoft.github.io/CCF/main/audit/read_write_restrictions.html#table-namespaces).
+#### Action
+```javascript
+[
+  "remove_did_domain",
+  new Action(
+    function (args) {
+      checkType(args.name, "string");
+    },
+    function (args) {
+      const name = ccf.strToBuf(args.name);
+      const table = "public:ccf.gov.did.domains";
+      if (ccf.kv[table].has(name)) {
+        ccf.kv[table].delete(name);
+      }
+    }
+  ),
+]
+```
+#### Proposal
+```sh
+./scurl.sh https://<host>/gov/proposals --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> --data-binary @remove_did_domain.json -H "content-type: application/json"
+```
+##### remove_did_domain.json
+```json
+{
+  "actions": [
+    {
+      "name": "remove_did_domain",
+      "args": {
+        "name": "example.com"
+      }
+    }
+  ]
+}
+```
+De-registering a domain does _not_ invalidate DIDs previously created in the domain, but does prevent new DIDs from being created in the domain.
 
 ## DID Operations
 
 ### Create (Private API)
-All authenticated members of the consortium can create new decentralized identifiers by calling the **identifiers/create** endpoint. This API generates a cryptographic key pair and DID Document which is stored in the members confidential computing enclave. 
+All authenticated members of a consortium and registered users of a given CCF network can create new decentralized identifiers by calling the **identifiers/create** endpoint. This API generates a cryptographic key pair and DID Document which is stored in the members confidential computing enclave.
 
 ```
 ./scurl.sh https://<host>/app/identifiers/create --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> -H "content-type: application/json" -X POST
@@ -45,19 +138,24 @@ Supported ECDSA curves (curve):
 - secp256r1
 - secp384r1
 
+#### Domain
+A caller seeking to create a DID in a given domain can specify the domain's name via the `domain` query string parameter. If the given domain has not previously been registered in the CCF Network by an authenticated member, then the request to create a DID in the domain will be rejected.
+
+If a caller does _not_ specify a domain in which to create a DID, then the DID will be created under the domain corresponding to the hostname of the node in the Network to which the caller submits the request.
+
 ### Resolve (Public API)
-DIDs can be resolved via the public endpoint **/identifiers/<did>/resolve** which returns the DID Document associated with the identifier if found on the network.
+DIDs can be resolved via the public endpoint **/identifiers/\<did\>/resolve** which returns the DID Document associated with the identifier if found on the network.
 
 ```
-https://<host>.com/app/identifiers/<did>/resolve
+https://<host>/app/identifiers/<did>/resolve
 ```
 ```json
 {
-    "id": "did:ccf:entra.confidential-ledger.azure.com:6eJ3sNIa83RmotH2qy2AH3FBsBvcAAtwpCwkHRwu1hg",
+    "id": "did:ccf:example.com:6eJ3sNIa83RmotH2qy2AH3FBsBvcAAtwpCwkHRwu1hg",
     "verificationMethod": [
         {
             "id": "#z2zHnxFN2QCK",
-            "controller": "did:ccf:entra.confidential-ledger.azure.com:6eJ3sNIa83RmotH2qy2AH3FBsBvcAAtwpCwkHRwu1hg",
+            "controller": "did:ccf:example.com:6eJ3sNIa83RmotH2qy2AH3FBsBvcAAtwpCwkHRwu1hg",
             "type": "JsonWebKey2020",
             "publicKeyJwk": {
                 "e": "AQAB",
@@ -79,9 +177,9 @@ https://<host>.com/app/identifiers/<did>/resolve
 }
 ```
 ### Update (Private API)
-All authenticated members of the consortium can update (roll, revoke) the keys associated with an identifier they own by calling the **identifiers/keys/roll** and **identifiers/keys/revoke** endpoints. 
+All authenticated members of a consortium and registered users of a given CCF Network can update (roll, revoke) the keys associated with an identifier they own by calling the **identifiers/\<did\>/keys/roll** and **identifiers/\<did\>/keys/revoke** endpoints. 
 
-When rolling the current signing key for a given identifier, if no algorithm or curve parameters are specified, the existing key properties are used to determine the new key. Key rolling results in the deletion of the private key and the key entry being marked as historical. Historical keys continue to be listed in the DID Document for the identifier. If a member wants to invalidate all credentials signed by a particular key, then the key should be revoked. This deletes the private key and marks the key as revoked, removing the key from the list of signing keys in the DID Document.
+When rolling the current signing key for a given identifier, if no algorithm or curve parameters are specified, the existing key properties are used to determine the new key. Key rolling results in the deletion of the private key and the key entry being marked as historical. Historical keys continue to be listed in the DID Document for the identifier. If a caller wants to invalidate all credentials signed by a particular key, then the key should be revoked. This deletes the private key and marks the key as revoked, removing the key from the list of signing keys in the DID Document.
 
 Supported key algorithms (alg):
 - RSASSA_PKCS1-v1_5
@@ -100,7 +198,7 @@ Supported ECDSA curves (curve):
 ```
 
 ### Deactivate
-All authenticated members of the consortium can deactivate an identifier that is under their control by calling the **identifiers/<did>/deactivate** endpoint. This API checks that the member making the request is the owner of the identifier and if true, removes the identifier and all it's associated keys from the network.
+All authenticated members of a consortium and registered users of a given CCF Network can deactivate an identifier that is under their control by calling the **identifiers/\<did\>/deactivate** endpoint. This API checks that the caller making the request is the owner of the identifier and if true, removes the identifier and all it's associated keys from the network.
 
 ```
 ./scurl.sh https://<host>/app/identifiers/<did>/deactivate --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> -H "content-type: application/json" -X PATCH

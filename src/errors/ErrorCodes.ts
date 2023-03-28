@@ -72,4 +72,9 @@ export enum ErrorCodes {
    * request.
    */
   SignatureNotProvided = 'request.signature_not_provided',
+
+  /**
+   * Indicates that a domain has not been registered.
+   */
+  DomainNotFound = 'request.domain_not_found',
 }
