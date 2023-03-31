@@ -10,6 +10,7 @@ export * from './models/EcdsaKeyPair';
 export * from './models/EddsaCurve';
 export * from './models/EddsaKeyPair';
 export * from './models/Identifier';
+export * from './models/IdentifierCreator';
 export * from './models/IdentifierResolver';
 export * from './models/IdentifierStore';
 export * from './models/KeyAlgorithm';

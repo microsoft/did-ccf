@@ -13,15 +13,13 @@ import {
   ControllerDocument,
   Domain,
   EcdsaCurve,
-  Identifier,
+  IdentifierCreator,
   IdentifierStore,
   KeyAlgorithm,
   KeyPair,
   KeyPairCreator,
   RequestParser,
   RsaKeyPair,
-  VerificationMethodRelationship,
-  VerificationMethodType,
  } from '../../models';
 import { RequestParameters } from '../../models/RequestParameters';
 
@@ -40,20 +38,9 @@ export function create (request: Request): Response {
   const algorithm = requestParser.getQueryParameter<KeyAlgorithm>(RequestParameters.Algorithm, KeyAlgorithm.Eddsa);
   const size = requestParser.getQueryParameter<number>(RequestParameters.KeySize, RsaKeyPair.DEFAULT_KEY_SIZE);
   const curve = requestParser.getQueryParameter<EcdsaCurve>(RequestParameters.Curve, EcdsaCurve.Secp256r1);
-
-  // If the caller specifies a domain, check that it is registered
-  let domain = requestParser.getQueryParameter(RequestParameters.Domain);
-  if (domain) {
-    const name = <string>domain;
-    if (!Domain.isRegistered(name)) {
-      // Bail out
-      return new DomainNotFound(name, authenticatedIdentity).toErrorResponse();
-    }
-  } else {
-    // Default to the hostname on the current node
-    domain = request.hostname;
-  }
-  console.log(`Creating identifier for member '${authenticatedIdentity.identifier}' with algorithm '${algorithm}' and curve '${curve}' in domain '${domain}`);
+  const prefix = requestParser.getQueryParameter<string>(RequestParameters.Domain, request.hostname);
+  console.log(
+    `Creating identifier for member '${authenticatedIdentity.identifier}' with algorithm '${algorithm}' and curve '${curve}' in '${prefix}'`);
 
   // Generate two key pairs per identifier, one for signing
   // and one for encryption
@@ -65,27 +52,6 @@ export function create (request: Request): Response {
   const publicKeyDigestBase64Url = Base64.fromUint8Array(new Uint8Array(publicKeyDigestArray), true).toString();
 
   // Create the identifier for the document based on the public key digest
-  const identifierId = `did:ccf:${domain}:${publicKeyDigestBase64Url}`;
-  const controllerDocument = new ControllerDocument(identifierId);
-
-  // Add the signing key
-  controllerDocument.addVerificationMethod({
-    id: `${identifierId}#${signingKeyPair.id}`,
-    controller: identifierId,
-    type: VerificationMethodType.JsonWebKey2020,
-    publicKeyJwk: signingKeyPair.asJwk(false),
-  }, [VerificationMethodRelationship.Authentication, VerificationMethodRelationship.AssertionMethod]);
-
-  // Add the encryption key
-  controllerDocument.addVerificationMethod({
-    id: `${identifierId}#${encryptionKeyPair.id}`,
-    controller: identifierId,
-    type: VerificationMethodType.JsonWebKey2020,
-    publicKeyJwk: encryptionKeyPair.asJwk(false),
-  }, [VerificationMethodRelationship.KeyAgreement]);
-
-  // Now store the keys in the key value store using the
-  // digest as the identifier.
   //
   // If the request is on behalf of a user/member (which is
   // determined by presence of the onBehalfOf parameter
@@ -97,20 +63,32 @@ export function create (request: Request): Response {
   // and `controllerDelegate`to the authenticated identity
   // identifier.
   const controller = onBehalfOf || authenticatedIdentity.identifier;
-  new IdentifierStore().addOrUpdate(
-    <Identifier> {
-      id: publicKeyDigestBase64Url,
-      controller,
-      controllerDocument,
-      keyPairs: [signingKeyPair, encryptionKeyPair],
-      controllerDelegate: authenticatedIdentity.identifier,
-    });
+  const identifier = IdentifierCreator.createIdentifier(
+    signingKeyPair,
+    encryptionKeyPair,
+    [prefix, publicKeyDigestBase64Url],
+    controller,
+    authenticatedIdentity.identifier);
 
-  console.log(`Identifier '${identifierId}' created for '${controller}'.`);
+  // Map to the domain, if one is indicated
+  const domain = new Domain(prefix);
+  if (domain.isRegistered || prefix === request.hostname) {
+    domain.add(identifier);
+  } else if (prefix !== request.hostname) {
+    // If we get here, then the caller has specified a domain which has not been
+    // adopted by the members of the consortium and is also not the hostname of
+    // the current node, so reject the request
+    return new DomainNotFound(prefix, authenticatedIdentity).toErrorResponse();
+  }
+
+  // Now store the keys in the key value store using the
+  // digest as the identifier.
+  new IdentifierStore().addOrUpdate(identifier);
+  console.log(`Identifier '${identifier.id}' created for '${controller}'.`);
 
   // Return 201 and the controller document representing the newly created identifier.
   return {
     statusCode: 201,
-    body: controllerDocument,
+    body: identifier.controllerDocument,
   };
 }
