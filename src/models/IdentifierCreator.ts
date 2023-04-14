@@ -31,7 +31,7 @@ export class IdentifierCreator {
 
     // Add the signing key
     controllerDocument.addVerificationMethod({
-      id: `${did}#${signingKeyPair.id}`,
+      id: `#${signingKeyPair.id}`,
       controller: did,
       type: VerificationMethodType.JsonWebKey2020,
       publicKeyJwk: signingKeyPair.asJwk(false),
@@ -39,7 +39,7 @@ export class IdentifierCreator {
 
     // Add the encryption key
     controllerDocument.addVerificationMethod({
-      id: `${did}#${encryptionKeyPair.id}`,
+      id: `#${encryptionKeyPair.id}`,
       controller: did,
       type: VerificationMethodType.JsonWebKey2020,
       publicKeyJwk: encryptionKeyPair.asJwk(false),
