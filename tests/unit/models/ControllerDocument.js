@@ -6,7 +6,7 @@ import { VerificationMethodRelationship } from '../../../dist/src/models/Verific
 
 import { expect } from 'chai';
 
-const EXPECTED_CONTEXT = '"@context":["https://www.w3.org/ns/did/v1","https://w3id.org/security/suites/jws-2020/v1",{"@vocab":"https://github.com/microsoft/did-ccf/blob/main/DID_CCF.md#"}]';
+const EXPECTED_CONTEXT = '"@context":["https://www.w3.org/ns/did/v1","https://w3id.org/security/suites/jws-2020/v1",{"@base":"test_identifier"},{"@vocab":"https://github.com/microsoft/did-ccf/blob/main/DID_CCF.md#"}]';
 
 describe ('ControllerDocument', () => {
     it ('should serialize to JSON with @context', () =>{
@@ -19,33 +19,33 @@ describe ('ControllerDocument', () => {
         it ('should add verification method and serialize to JSON', () =>{
             const controllerDocument = new ControllerDocument('test_identifier');
             const verificationMethod = {
-                id: "method_identifier",
+                id: "#method_identifier",
                 controller: "test_identifier",
                 type: VerificationMethodType.JsonWebKey2020,
                 publicKeyJwk: {}
             };
             controllerDocument.addVerificationMethod(verificationMethod);
             const json = JSON.stringify(controllerDocument);
-            expect(json).to.equal(`{"id":"test_identifier","verificationMethod":[{"id":"method_identifier","controller":"test_identifier","type":"JsonWebKey2020","publicKeyJwk":{}}],${EXPECTED_CONTEXT}}`);
+            expect(json).to.equal(`{"id":"test_identifier","verificationMethod":[{"id":"#method_identifier","controller":"test_identifier","type":"JsonWebKey2020","publicKeyJwk":{}}],${EXPECTED_CONTEXT}}`);
         });
 
         it ('should add verification method plus relationship and serialize to JSON', () =>{
             const controllerDocument = new ControllerDocument('test_identifier');
             const verificationMethod = {
-                id: "method_identifier",
+                id: "#method_identifier",
                 controller: "test_identifier",
                 type: VerificationMethodType.JsonWebKey2020,
                 publicKeyJwk: {}
             };
             controllerDocument.addVerificationMethod(verificationMethod, [VerificationMethodRelationship.Authentication ] )
             const json = JSON.stringify(controllerDocument);
-            expect(json).to.equal(`{"id":"test_identifier","verificationMethod":[{"id":"method_identifier","controller":"test_identifier","type":"JsonWebKey2020","publicKeyJwk":{}}],${EXPECTED_CONTEXT},"authentication":["method_identifier"]}`);
+            expect(json).to.equal(`{"id":"test_identifier","verificationMethod":[{"id":"#method_identifier","controller":"test_identifier","type":"JsonWebKey2020","publicKeyJwk":{}}],${EXPECTED_CONTEXT},"authentication":["#method_identifier"]}`);
         });
 
         it ('should add verification relationships when provided', () =>{
             const controllerDocument = new ControllerDocument('test_identifier');
             const verificationMethod = {
-                id: "method_identifier",
+                id: "#method_identifier",
                 controller: "test_identifier",
                 type: VerificationMethodType.JsonWebKey2020,
                 publicKeyJwk: {}

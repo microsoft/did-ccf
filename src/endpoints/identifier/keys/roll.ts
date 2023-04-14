@@ -105,7 +105,7 @@ export function roll (request: Request): Response {
       VerificationMethodRelationship.KeyAgreement;
 
     controllerDocument.addVerificationMethod({
-      id: newKey.id,
+      id: `#${newKey.id}`,
       controller: identifier.controllerDocument.id,
       type: VerificationMethodType.JsonWebKey2020,
       publicKeyJwk: newKey.asJwk(false),
