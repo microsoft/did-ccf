@@ -17,8 +17,8 @@ import {
   KeyPairCreator,
   KeyState,
   KeyUse,
+  RequestContext,
   RequestParameters,
-  RequestParser,
   VerificationMethodRelationship,
   VerificationMethodType,
 } from '../../../models';
@@ -41,17 +41,17 @@ import {
 export function roll (request: Request): Response {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const requestParser = new RequestParser(request);
-  const identifierId: string = requestParser.identifier;
+  const context = new RequestContext(request);
+  const identifierId: string = context.identifier;
 
   // Get the optional parameters from the request
-  const keyUse = requestParser.getQueryParameter<KeyUse>('use', KeyUse.Signing);
+  const keyUse = context.getQueryParameter<KeyUse>('use', KeyUse.Signing);
 
   // Check an identifier has been provided and
   // if not return 400 Bad Request
   if (!identifierId) {
     const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
-    console.log(identifierNotProvided);
+    context.logger.info(identifierNotProvided);
     return identifierNotProvided.toErrorResponse();
   }
 
@@ -82,9 +82,9 @@ export function roll (request: Request): Response {
     // query string to see if any alg and curve params
     // have been specified. If not just use the properties
     // of the existing key.
-    const algorithm = requestParser.getQueryParameter<KeyAlgorithm>(RequestParameters.Algorithm, currentKey.algorithm);
-    const size = requestParser.getQueryParameter<number>(RequestParameters.KeySize, currentKey.size);
-    const curve = requestParser.getQueryParameter<EcdsaCurve | EddsaCurve>(RequestParameters.Curve, currentKey?.curve);
+    const algorithm = context.getQueryParameter<KeyAlgorithm>(RequestParameters.Algorithm, currentKey.algorithm);
+    const size = context.getQueryParameter<number>(RequestParameters.KeySize, currentKey.size);
+    const curve = context.getQueryParameter<EcdsaCurve | EddsaCurve>(RequestParameters.Curve, currentKey?.curve);
 
     // Now generate the new key
     const newKey: KeyPair = KeyPairCreator.createKey(algorithm, keyUse, size, curve);

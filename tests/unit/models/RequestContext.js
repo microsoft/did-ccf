@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
-import { RequestParser } from '../../../dist/src/models/RequestParser.js';
+import { RequestContext } from '../../../dist/src/models/RequestContext.js';
 import { expect } from 'chai';
 
-describe ('RequestParser', () => {
+describe ('RequestContext', () => {
     it ('should construct a new instance', () => {
         
         const request = {
@@ -14,8 +14,8 @@ describe ('RequestParser', () => {
             query: "queryOne=queryValueOne&queryTwo=queryValueTwo"
         };
         
-        const requestParser = new RequestParser(request);
-        expect(requestParser).not.null;
+        const context = new RequestContext(request);
+        expect(context).not.null;
     });
 
     describe ('getPathParameter', () => {
@@ -29,8 +29,8 @@ describe ('RequestParser', () => {
                 query: "queryOne=queryValueOne&queryTwo=queryValueTwo"
             };
             
-            const requestParser = new RequestParser(request);
-            const result = requestParser.getPathParameter('doesNotExist');
+            const context = new RequestContext(request);
+            const result = context.getPathParameter('doesNotExist');
             expect(result).to.be.undefined;
         });
 
@@ -44,8 +44,8 @@ describe ('RequestParser', () => {
                 query: "queryOne=queryValueOne&queryTwo=queryValueTwo"
             };
             
-            const requestParser = new RequestParser(request);
-            const result = requestParser.getPathParameter('keyTwo');
+            const context = new RequestContext(request);
+            const result = context.getPathParameter('keyTwo');
             expect(result).to.be.undefined;
         });
 
@@ -59,8 +59,8 @@ describe ('RequestParser', () => {
                 query: "queryOne=queryValueOne&queryTwo=queryValueTwo"
             };
             
-            const requestParser = new RequestParser(request);
-            const result = requestParser.getPathParameter('keyTwo');
+            const context = new RequestContext(request);
+            const result = context.getPathParameter('keyTwo');
             expect(result).to.equal('valueTwo');
         });
 
@@ -74,8 +74,8 @@ describe ('RequestParser', () => {
                 query: "queryOne=queryValueOne&queryTwo=queryValueTwo"
             };
             
-            const requestParser = new RequestParser(request);
-            const result = requestParser.getPathParameter('keyTwo');
+            const context = new RequestContext(request);
+            const result = context.getPathParameter('keyTwo');
             expect(result).to.equal('#valueTwo');
         });
     });
@@ -91,8 +91,8 @@ describe ('RequestParser', () => {
                 query: "queryOne=queryValueOne&queryTwo=queryValueTwo"
             };
             
-            const requestParser = new RequestParser(request);
-            const result = requestParser.getQueryParameter('doesNotExist');
+            const context = new RequestContext(request);
+            const result = context.getQueryParameter('doesNotExist');
             expect(result).to.be.undefined;
         });
 
@@ -106,8 +106,8 @@ describe ('RequestParser', () => {
                 query: "queryOne=%20%20&queryTwo=queryValueTwo"
             };
             
-            const requestParser = new RequestParser(request);
-            const result = requestParser.getQueryParameter('queryOne');
+            const context = new RequestContext(request);
+            const result = context.getQueryParameter('queryOne');
             expect(result).to.be.undefined;
         });
 
@@ -121,8 +121,8 @@ describe ('RequestParser', () => {
                 query: "?queryOne=queryValueOne&queryTwo=queryValueTwo"
             };
             
-            const requestParser = new RequestParser(request);
-            const result = requestParser.getQueryParameter('queryTwo');
+            const context = new RequestContext(request);
+            const result = context.getQueryParameter('queryTwo');
             expect(result).to.equal('queryValueTwo');
         });
 
@@ -136,8 +136,8 @@ describe ('RequestParser', () => {
                 query: "queryOne=queryValueOne&queryTwo=%23queryValueTwo"
             };
             
-            const requestParser = new RequestParser(request);
-            const result = requestParser.getQueryParameter('queryTwo');
+            const context = new RequestContext(request);
+            const result = context.getQueryParameter('queryTwo');
             expect(result).to.equal('#queryValueTwo');
         });
 
@@ -151,8 +151,8 @@ describe ('RequestParser', () => {
                 query: "queryOne=queryValueOne&queryTwo=queryValueTwo"
             };
             
-            const requestParser = new RequestParser(request);
-            const result = requestParser.getQueryParameter('doesNotExit', 'defaultValue');
+            const context = new RequestContext(request);
+            const result = context.getQueryParameter('doesNotExit', 'defaultValue');
             expect(result).to.equal('defaultValue');
         });
 
@@ -166,8 +166,8 @@ describe ('RequestParser', () => {
                 query: "queryOne=queryValueOne&queryTwo=%20%20"
             };
             
-            const requestParser = new RequestParser(request);
-            const result = requestParser.getQueryParameter('queryTwo', 'defaultValue');
+            const context = new RequestContext(request);
+            const result = context.getQueryParameter('queryTwo', 'defaultValue');
             expect(result).to.equal('defaultValue');
         });
     });

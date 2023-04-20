@@ -24,7 +24,7 @@ import {
     AuthenticatedIdentity,
     IdentifierStore,
     KeyUse,
-    RequestParser,
+    RequestContext,
     SignedPayload,
 } from '../../../models';
 
@@ -36,14 +36,14 @@ import {
 export function sign (request: Request): Response<any> {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const requestParser = new RequestParser(request);
-  const identifierId = requestParser.identifier;
+  const context = new RequestContext(request);
+  const identifierId = context.identifier;
 
   // Check an identifier has been provided and
   // if not return 400 Bad Request
   if (!identifierId) {
     const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
-    console.log(identifierNotProvided);
+    context.logger.info(identifierNotProvided);
     return identifierNotProvided.toErrorResponse();
   }
 
@@ -52,7 +52,7 @@ export function sign (request: Request): Response<any> {
   const payload = request.body.text();
   if (!payload || payload.length === 0) {
     const payloadNotProvided = new PayloadNotProvided(authenticatedIdentity);
-    console.log(payloadNotProvided);
+    context.logger.info(payloadNotProvided);
     return payloadNotProvided.toErrorResponse();
   }
 

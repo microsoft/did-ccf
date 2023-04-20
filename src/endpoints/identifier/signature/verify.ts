@@ -25,7 +25,7 @@ import {
     AuthenticatedIdentity,
     IdentifierStore,
     KeyUse,
-    RequestParser,
+    RequestContext,
     SignedPayload,
 } from '../../../models';
 
@@ -37,14 +37,14 @@ import {
 export function verify (request: Request): Response<any> {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const requestParser = new RequestParser(request);
-  const identifierId = requestParser.identifier;
+  const context = new RequestContext(request);
+  const identifierId = context.identifier;
 
   // Check an identifier has been provided and
   // if not return 400 Bad Request
   if (!identifierId) {
     const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
-    console.log(identifierNotProvided);
+    context.logger.warn(identifierNotProvided);
     return identifierNotProvided.toErrorResponse();
   }
 
@@ -58,19 +58,19 @@ export function verify (request: Request): Response<any> {
 
   if (!signatureBase64 || signatureBase64.length === 0) {
     const signatureNotProvided = new SignatureNotProvided(authenticatedIdentity);
-    console.log(signatureNotProvided);
+    context.logger.warn(signatureNotProvided);
     return signatureNotProvided.toErrorResponse();
   }
 
   if (!payload || payload.length === 0) {
     const payloadNotProvided = new PayloadNotProvided(authenticatedIdentity);
-    console.log(payloadNotProvided);
+    context.logger.warn(payloadNotProvided);
     return payloadNotProvided.toErrorResponse();
   }
 
   if (!signerIdentifier || signerIdentifier.length === 0) {
     const signerIdentifierNotProvided = new SignerIdentifierNotProvided(authenticatedIdentity);
-    console.log(signerIdentifierNotProvided);
+    context.logger.warn(signerIdentifierNotProvided);
     return signerIdentifierNotProvided.toErrorResponse();
   }
 
@@ -85,9 +85,9 @@ export function verify (request: Request): Response<any> {
     const currentKey = identifier.getCurrentKey(KeyUse.Signing);
     if (!currentKey) {
       const keyNotConfigured = new KeyNotConfigured(authenticatedIdentity, identifierId);
-      // Send to the console as an error since this is not
+      // Log as an error since this is not
       // a client recoverable error.
-      console.error(keyNotConfigured);
+      context.logger.error(keyNotConfigured);
       return keyNotConfigured.toErrorResponse();
     }
 

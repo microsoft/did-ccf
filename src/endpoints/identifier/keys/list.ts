@@ -5,7 +5,7 @@ import { AuthenticatedRequestError, IdentifierNotProvided } from '../../../error
 import {
   AuthenticatedIdentity,
   IdentifierStore,
-  RequestParser,
+  RequestContext,
 } from '../../../models';
 
 /**
@@ -15,14 +15,14 @@ import {
 export function list (request: Request): Response {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const requestParser = new RequestParser(request);
-  const identifierId: string = requestParser.identifier;
+  const context = new RequestContext(request);
+  const identifierId: string = context.identifier;
 
   // Check an identifier has been provided and
   // if not return 400 Bad Request
   if (!identifierId) {
     const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
-    console.log(identifierNotProvided);
+    context.logger.info(identifierNotProvided);
     return identifierNotProvided.toErrorResponse();
   }
 

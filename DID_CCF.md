@@ -1,6 +1,6 @@
 # did:ccf Method Specification
 
-**Authors**: Brandon Murdoch, Eddy Ashton, Amaury Chamayou, Sylvan Clebsch  
+**Authors**: Brandon Murdoch, Eddy Ashton, Amaury Chamayou, Sylvan Clebsch, Stephen Higgins
 **Latest version**: https://github.com/microsoft/did-ccf/blob/main/did-ccf.md  
 **Status**: Working Draft  
 
@@ -18,7 +18,7 @@ did-ccf:           "did:ccf:" + account_id
 account_id:        domain|node_id + ":" + account_address
 domain:            [-a-zA-Z0-9\-\.]{1,253}
 node_id:           [-a-zA-Z0-9\-\.]{1,64}
-account_address:   [a-zA-Z0-9]{1,64}
+account_address:   [a-zA-Z0-9\_\-]{1,64}
 ```
 ### Examples
 #### Scoped to a node identifier (default configuration)

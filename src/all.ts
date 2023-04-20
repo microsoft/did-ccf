@@ -3,19 +3,9 @@
 
 /* Export endpoints exposed by the CCF App. These
 are referenced in the app.json file. */
-export * from './endpoints/identifier/count';
-export * from './endpoints/identifier/create';
-export * from './endpoints/identifier/resolve';
-export * from './endpoints/identifier/deactivate';
-export * from './endpoints/identifier/services/add';
-export * from './endpoints/identifier/services/remove';
-export * from './endpoints/identifier/signature/sign';
-export * from './endpoints/identifier/signature/verify';
-export * from './endpoints/identifier/keys/list';
-export * from './endpoints/identifier/keys/revoke';
-export * from './endpoints/identifier/keys/roll';
-export * from './endpoints/identifier/keys/exportPrivate';
+export * from './endpoints';
 
 // Export error classes and models
 export * from './errors';
 export * from './models';
+export * from './logging';

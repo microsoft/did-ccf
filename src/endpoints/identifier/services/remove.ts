@@ -10,7 +10,7 @@ import {
   AuthenticatedIdentity,
   ControllerDocument,
   IdentifierStore,
-  RequestParser,
+  RequestContext,
 } from '../../../models';
 
 /**
@@ -20,22 +20,22 @@ import {
 export function remove (request: Request): Response {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const requestParser = new RequestParser(request);
-  const identifierId: string = requestParser.identifier;
-  const service: string = requestParser.serviceIdentifier;
+  const context = new RequestContext(request);
+  const identifierId: string = context.identifier;
+  const service: string = context.serviceIdentifier;
 
   // Check an identifier has been provided and
   // if not return 400 Bad Request
   if (!identifierId) {
     const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
-    console.log(identifierNotProvided);
+    context.logger.info(identifierNotProvided);
     return identifierNotProvided.toErrorResponse();
   }
 
   // Check a service has been provided
   if (!service) {
     const serviceNotProvided = new ServiceIdentifierNotProvided(authenticatedIdentity);
-    console.log(serviceNotProvided);
+    context.logger.info(serviceNotProvided);
     return serviceNotProvided.toErrorResponse();
   }
 

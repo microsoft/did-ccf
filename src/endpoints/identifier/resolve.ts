@@ -4,7 +4,7 @@ import { Request, Response } from '@microsoft/ccf-app';
 import { AuthenticatedRequestError } from '../../errors';
 import {
   IdentifierResolver,
-  RequestParser,
+  RequestContext,
  } from '../../models';
 
 /**
@@ -13,8 +13,8 @@ import {
  * @returns HTTP 200 Created and the {@link ControllerDocument} for the identifier.
  */
 export function resolve (request: Request): Response<any> {
-  const requestParser = new RequestParser(request);
-  const identifierId = requestParser.identifier;
+  const context = new RequestContext(request);
+  const identifierId = context.identifier;
 
   try {
     const identifier = IdentifierResolver.resolveLocal(identifierId);

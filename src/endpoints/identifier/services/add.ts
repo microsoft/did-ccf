@@ -11,7 +11,7 @@ import {
   AuthenticatedIdentity,
   ControllerDocument,
   IdentifierStore,
-  RequestParser,
+  RequestContext,
 } from '../../../models';
 import { Service } from '../../../models/Service';
 
@@ -22,14 +22,14 @@ import { Service } from '../../../models/Service';
 export function add (request: Request): Response {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const requestParser = new RequestParser(request);
-  const identifierId: string = requestParser.identifier;
+  const context = new RequestContext(request);
+  const identifierId: string = context.identifier;
 
   // Check an identifier has been provided and
   // if not return 400 Bad Request
   if (!identifierId) {
     const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
-    console.log(identifierNotProvided);
+    context.logger.info(identifierNotProvided);
     return identifierNotProvided.toErrorResponse();
   }
 
@@ -39,25 +39,25 @@ export function add (request: Request): Response {
 
   if (!service) {
     const serviceNotProvided = new ServiceNotProvided(authenticatedIdentity);
-    console.log(serviceNotProvided);
+    context.logger.info(serviceNotProvided);
     return serviceNotProvided.toErrorResponse();
   }
 
   if (!service.id) {
     const invalidService = new InvalidServiceProperty(authenticatedIdentity, 'id');
-    console.log(invalidService);
+    context.logger.info(invalidService);
     return invalidService.toErrorResponse();
   }
 
   if (!service.type) {
     const invalidService = new InvalidServiceProperty(authenticatedIdentity, 'type');
-    console.log(invalidService);
+    context.logger.info(invalidService);
     return invalidService.toErrorResponse();
   }
 
   if (!service.serviceEndpoint) {
     const invalidService = new InvalidServiceProperty(authenticatedIdentity, 'serviceEndpoint');
-    console.log(invalidService);
+    context.logger.info(invalidService);
     return invalidService.toErrorResponse();
   }
 
