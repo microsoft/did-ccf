@@ -1,12 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
 import { Request } from '@microsoft/ccf-app';
+import ILogger from '../interfaces/ILogger';
+import IRequestContext from '../interfaces/IRequestContext';
+import LoggerCreator from '../logging/LoggerCreator';
 import { RequestParameters } from './RequestParameters';
 
 /**
- * A utility class for parsing request parameters.
+ * Encapsulates the context of a given request.
  */
-export class RequestParser {
+export class RequestContext implements IRequestContext {
   /**
    * Static readonly regular expression for checking white space.
    */
@@ -15,7 +18,7 @@ export class RequestParser {
   /**
    * Static readonly property for the query string regular expression.
    */
-  public static readonly PARSER_REGEX = /([^=?#&]+)=?([^&]*)/g;
+  public static readonly QUERY_STRING_PARSER_REGEX = /([^=?#&]+)=?([^&]*)/g;
 
   /**
    * Map to hold the parsed query string parameters.
@@ -23,7 +26,12 @@ export class RequestParser {
   private queryParameters: Map<string, string> = new Map();
 
   /**
-   * Constructs a new instance of the {}class.
+   * Gives a context-specific logger instance
+   */
+  private _logger: ILogger;
+
+  /**
+   * Constructs a new instance of the class.
    * @param {Request} request to parse.
    */
   constructor (private request: Request) {
@@ -33,10 +41,18 @@ export class RequestParser {
       // Decode the query string part of the request
       const decodedQueryString = decodeURIComponent(request.query);
       let param: RegExpExecArray;
-      while (param = RequestParser.PARSER_REGEX.exec(decodedQueryString)) {
+      while (param = RequestContext.QUERY_STRING_PARSER_REGEX.exec(decodedQueryString)) {
         this.queryParameters.set(param[1], param[2]);
       }
     }
+    this._logger = LoggerCreator.createLogger(this);
+  }
+
+  /**
+   * Returns the logger
+   */
+  public get logger (): ILogger {
+    return this._logger;
   }
 
   /**
@@ -70,7 +86,7 @@ export class RequestParser {
    */
   public getQueryParameter<T> (id: string, defaultIfMissing?: T): T {
     const parameter = this.queryParameters.get(id);
-    if (parameter && !RequestParser.ONLY_WHITE_SPACE.test(parameter)) {
+    if (parameter && !RequestContext.ONLY_WHITE_SPACE.test(parameter)) {
       return <T>(<unknown>parameter);
     }
 
@@ -90,9 +106,27 @@ export class RequestParser {
     if (id in this.request.params) {
       const value = decodeURIComponent(this.request.params[id]);
 
-      if (!value || !RequestParser.ONLY_WHITE_SPACE.test(value)) {
+      if (!value || !RequestContext.ONLY_WHITE_SPACE.test(value)) {
         return value;
       }
     }
+  }
+
+  /**
+   * Returns the headers which match the given predicate.
+   * @param matching a predicate to apply to each header
+   * @returns the headers for which the predicate evaluated to true.
+   */
+  public getHeaders<T> (matching: (header: Record<string, string>) => T | undefined): T[] {
+    const records: Record<string, string>[] = [];
+    const matched: T[] = [];
+    for (const key in this.request.headers) {
+      const value = this.request.headers[key];
+      const t = matching({ key, value });
+      if (t !== undefined) {
+        matched.push(t);
+      }
+    }
+    return matched;
   }
 }

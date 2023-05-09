@@ -18,7 +18,7 @@ import {
   KeyAlgorithm,
   KeyPair,
   KeyPairCreator,
-  RequestParser,
+  RequestContext,
   RsaKeyPair,
  } from '../../models';
 import { RequestParameters } from '../../models/RequestParameters';
@@ -31,15 +31,15 @@ import { RequestParameters } from '../../models/RequestParameters';
 export function create (request: Request): Response {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const requestParser = new RequestParser(request);
+  const context = new RequestContext(request);
 
   // Get the optional parameters from the request
-  const onBehalfOf = requestParser.getQueryParameter<string>(RequestParameters.OnBehalfOf);
-  const algorithm = requestParser.getQueryParameter<KeyAlgorithm>(RequestParameters.Algorithm, KeyAlgorithm.Eddsa);
-  const size = requestParser.getQueryParameter<number>(RequestParameters.KeySize, RsaKeyPair.DEFAULT_KEY_SIZE);
-  const curve = requestParser.getQueryParameter<EcdsaCurve>(RequestParameters.Curve, EcdsaCurve.Secp256r1);
-  const prefix = requestParser.getQueryParameter<string>(RequestParameters.Domain, request.hostname);
-  console.log(
+  const onBehalfOf = context.getQueryParameter<string>(RequestParameters.OnBehalfOf);
+  const algorithm = context.getQueryParameter<KeyAlgorithm>(RequestParameters.Algorithm, KeyAlgorithm.Eddsa);
+  const size = context.getQueryParameter<number>(RequestParameters.KeySize, RsaKeyPair.DEFAULT_KEY_SIZE);
+  const curve = context.getQueryParameter<EcdsaCurve>(RequestParameters.Curve, EcdsaCurve.Secp256r1);
+  const prefix = context.getQueryParameter<string>(RequestParameters.Domain, request.hostname);
+  context.logger.info(
     `Creating identifier for member '${authenticatedIdentity.identifier}' with algorithm '${algorithm}' and curve '${curve}' in '${prefix}'`);
 
   // Generate two key pairs per identifier, one for signing
@@ -84,7 +84,7 @@ export function create (request: Request): Response {
   // Now store the keys in the key value store using the
   // digest as the identifier.
   new IdentifierStore().addOrUpdate(identifier);
-  console.log(`Identifier '${identifier.id}' created for '${controller}'.`);
+  context.logger.info(`Identifier '${identifier.id}' created for '${controller}'.`);
 
   // Return 201 and the controller document representing the newly created identifier.
   return {

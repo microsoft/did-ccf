@@ -9,7 +9,7 @@ import {
 import {
   AuthenticatedIdentity,
   IdentifierStore,
-  RequestParser,
+  RequestContext,
 } from '../../../models';
 
 /**
@@ -20,15 +20,15 @@ import {
 export function exportPrivate (request: Request): Response {
   // Get the authentication details of the caller
   const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
-  const requestParser = new RequestParser(request);
-  const identifierId: string = requestParser.identifier;
-  const keyIdentifier: string = requestParser.keyIdentifier;
+  const context = new RequestContext(request);
+  const identifierId: string = context.identifier;
+  const keyIdentifier: string = context.keyIdentifier;
 
   // Check an identifier has been provided and
   // if not return 400 Bad Request
   if (!identifierId) {
     const identifierNotProvided = new IdentifierNotProvided(authenticatedIdentity);
-    console.log(identifierNotProvided);
+    context.logger.warn(identifierNotProvided);
     return identifierNotProvided.toErrorResponse();
   }
 
@@ -40,7 +40,7 @@ export function exportPrivate (request: Request): Response {
     const matchedKey = identifier.getKeyById(keyIdentifier);
     if (!matchedKey) {
       const keyNotFound = new KeyNotFound(authenticatedIdentity, identifierId, keyIdentifier);
-      console.log(keyNotFound);
+      context.logger.warn(keyNotFound);
       return keyNotFound.toErrorResponse();
     }
 
