@@ -52,18 +52,6 @@ describe ('AuthenticatedIdentity', () => {
         expect(authenticatedIdentity.identifier).to.equal('member_cert_id');
     });
 
-    it ('should construct a new instance for `member_cose_sign1` policy.', () => {
-        const authnIdentity = {
-            policy: "member_cose_sign1",
-            id: "member_cose_sign1_id"  
-        };
-
-        const authenticatedIdentity = new AuthenticatedIdentity(authnIdentity);
-        expect(authenticatedIdentity).not.null;
-        expect(authenticatedIdentity.policy).to.equal('member_cose_sign1');
-        expect(authenticatedIdentity.identifier).to.equal('member_cose_sign1_id');
-    });
-
     it ('should construct a new instance for `user_cert` policy.', () => {
         const authnIdentity = {
             policy: "user_cert",

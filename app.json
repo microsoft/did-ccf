@@ -5,7 +5,7 @@
         "js_module": "endpoints/identifier/count.js",
         "js_function": "count",
         "forwarding_required": "never",
-        "authn_policies": ["jwt", "user_cose_sign1", "member_cose_sign1"],
+        "authn_policies": ["jwt", "user_cose_sign1"],
         "mode": "readonly",
         "openapi": {
           "responses": {
@@ -28,7 +28,7 @@
         "js_module": "endpoints/identifier/create.js",
         "js_function": "create",
         "forwarding_required": "always",
-        "authn_policies": ["jwt", "user_cose_sign1", "member_cose_sign1"],
+        "authn_policies": ["jwt", "user_cose_sign1"],
         "mode": "readwrite",
         "openapi": {
           "parameters": [
@@ -159,7 +159,7 @@
         "js_module": "endpoints/identifier/deactivate.js",
         "js_function": "deactivate",
         "forwarding_required": "always",
-        "authn_policies": ["jwt", "user_cose_sign1", "member_cose_sign1"],
+        "authn_policies": ["jwt", "user_cose_sign1"],
         "mode": "readwrite",
         "openapi": {
           "parameters": [
@@ -231,7 +231,7 @@
         "js_module": "endpoints/identifier/signature/sign.js",
         "js_function": "sign",
         "forwarding_required": "never",
-        "authn_policies": ["jwt", "user_cose_sign1", "member_cose_sign1"],
+        "authn_policies": ["jwt", "user_cose_sign1"],
         "mode": "readonly",
         "openapi": {
           "parameters": [
@@ -303,7 +303,7 @@
         "js_module": "endpoints/identifier/signature/verify.js",
         "js_function": "verify",
         "forwarding_required": "never",
-        "authn_policies": ["jwt", "user_cose_sign1", "member_cose_sign1"],
+        "authn_policies": ["jwt", "user_cose_sign1"],
         "mode": "readonly",
         "openapi": {
           "parameters": [
@@ -375,7 +375,7 @@
         "js_module": "endpoints/identifier/services/add.js",
         "js_function": "add",
         "forwarding_required": "always",
-        "authn_policies": ["jwt", "user_cose_sign1", "member_cose_sign1"],
+        "authn_policies": ["jwt", "user_cose_sign1"],
         "mode": "readonly",
         "openapi": {
           "parameters": [
@@ -447,7 +447,7 @@
         "js_module": "endpoints/identifier/services/remove.js",
         "js_function": "remove",
         "forwarding_required": "always",
-        "authn_policies": ["jwt", "user_cose_sign1", "member_cose_sign1"],
+        "authn_policies": ["jwt", "user_cose_sign1"],
         "mode": "readonly",
         "openapi": {
           "parameters": [
@@ -519,7 +519,7 @@
         "js_module": "endpoints/identifier/keys/list.js",
         "js_function": "list",
         "forwarding_required": "never",
-        "authn_policies": ["jwt", "user_cose_sign1", "member_cose_sign1"],
+        "authn_policies": ["jwt", "user_cose_sign1"],
         "mode": "readonly",
         "openapi": {
           "parameters": [
@@ -551,7 +551,7 @@
         "js_module": "endpoints/identifier/keys/roll.js",
         "js_function": "roll",
         "forwarding_required": "always",
-        "authn_policies": ["jwt", "user_cose_sign1", "member_cose_sign1"],
+        "authn_policies": ["jwt", "user_cose_sign1"],
         "mode": "readwrite",
         "openapi": {
           "parameters": [
@@ -618,7 +618,7 @@
         "js_module": "endpoints/identifier/keys/revoke.js",
         "js_function": "revoke",
         "forwarding_required": "always",
-        "authn_policies": ["jwt", "user_cose_sign1", "member_cose_sign1"],
+        "authn_policies": ["jwt", "user_cose_sign1"],
         "mode": "readwrite",
         "openapi": {
           "parameters": [
@@ -658,7 +658,7 @@
         "js_module": "endpoints/identifier/keys/exportPrivate.js",
         "js_function": "exportPrivate",
         "forwarding_required": "never",
-        "authn_policies": ["jwt", "user_cose_sign1", "member_cose_sign1"],
+        "authn_policies": ["jwt", "user_cose_sign1"],
         "mode": "readonly",
         "openapi": {
           "parameters": [

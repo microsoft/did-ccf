@@ -62,8 +62,6 @@ export class AuthenticatedIdentity {
         return (<UserCertAuthnIdentity>identity).id;
       case 'user_cose_sign1':
         return (<UserCOSESign1AuthnIdentity>identity).id;
-      case 'member_cose_sign1':
-        return (<MemberCOSESign1AuthnIdentity>identity).id;
       default:
         return UNAUTHENTICATED;
     }
