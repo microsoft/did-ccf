@@ -4,9 +4,9 @@ import {
   AuthnIdentity,
   JwtAuthnIdentity,
   MemberCertAuthnIdentity,
-  MemberSignatureAuthnIdentity,
+  MemberCOSESign1AuthnIdentity,
   UserCertAuthnIdentity,
-  UserSignatureAuthnIdentity,
+  UserCOSESign1AuthnIdentity,
 } from '@microsoft/ccf-app';
 
 const UNAUTHENTICATED: string = 'Unauthenticated';
@@ -58,12 +58,12 @@ export class AuthenticatedIdentity {
         return (<JwtAuthnIdentity>identity).jwt.keyIssuer;
       case 'member_cert':
         return (<MemberCertAuthnIdentity>identity).id;
-      case 'member_signature':
-        return (<MemberSignatureAuthnIdentity>identity).id;
       case 'user_cert':
         return (<UserCertAuthnIdentity>identity).id;
-      case 'user_signature':
-        return (<UserSignatureAuthnIdentity>identity).id;
+      case 'user_cose_sign1':
+        return (<UserCOSESign1AuthnIdentity>identity).id;
+      case 'member_cose_sign1':
+        return (<MemberCOSESign1AuthnIdentity>identity).id;
       default:
         return UNAUTHENTICATED;
     }

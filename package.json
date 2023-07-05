@@ -19,7 +19,7 @@
     "trailingComma": "es5"
   },
   "dependencies": {
-    "@microsoft/ccf-app": "3.0.5",
+    "@microsoft/ccf-app": "4.0.4",
     "js-base64": "3.7.4"
   },
   "devDependencies": {
@@ -34,7 +34,7 @@
     "http-server": "^0.13.0",
     "rollup": "^2.41.0",
     "tslib": "^2.0.1",
-    "typescript": "^3.9.9" ,
+    "typescript": "^3.9.9",
     "copyfiles": "2.4.1",
     "tslint": "^5.20.1",
     "tslint-eslint-rules": "^5.4.0",
