@@ -35,7 +35,12 @@ export function add (request: Request): Response {
 
   // Get the service JSON from the request and check that
   // is correctly formed.
-  const service = <Service>request.body.json();
+  let service : Service;
+  if (authenticatedIdentity.policy === 'user_cose_sign1') {
+    service = JSON.parse(authenticatedIdentity.coseBody);
+  } else {
+    service = request.body.json();
+  }
 
   if (!service) {
     const serviceNotProvided = new ServiceNotProvided(authenticatedIdentity);

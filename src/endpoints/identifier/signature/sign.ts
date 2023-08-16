@@ -49,7 +49,13 @@ export function sign (request: Request): Response<any> {
 
   // Read the text from the request and validate
   // before we do any work retrieving keys.
-  const payload = request.body.text();
+  let payload : string;
+  if (authenticatedIdentity.policy === 'user_cose_sign1') {
+    payload = authenticatedIdentity.coseBody;
+  } else {
+    payload = request.body.text();
+  }
+
   if (!payload || payload.length === 0) {
     const payloadNotProvided = new PayloadNotProvided(authenticatedIdentity);
     context.logger.info(payloadNotProvided);

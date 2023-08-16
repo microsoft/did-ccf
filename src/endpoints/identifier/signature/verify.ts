@@ -51,7 +51,13 @@ export function verify (request: Request): Response<any> {
   // Get the signature and payload from
   // the body JSON and validate before we do any
   // real work.
-  const bodyJson = <SignedPayload>request.body.json();
+  let bodyJson: SignedPayload;
+  if (authenticatedIdentity.policy === 'user_cose_sign1') {
+    bodyJson = JSON.parse(authenticatedIdentity.coseBody);
+  } else {
+    bodyJson = request.body.json();
+  }
+
   const signatureBase64 = bodyJson.signature;
   const payload = bodyJson.payload;
   const signerIdentifier = bodyJson.signer;

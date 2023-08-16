@@ -20,7 +20,7 @@ import {
   KeyPairCreator,
   RequestContext,
   RsaKeyPair,
- } from '../../models';
+} from '../../models';
 import { RequestParameters } from '../../models/RequestParameters';
 
 /**

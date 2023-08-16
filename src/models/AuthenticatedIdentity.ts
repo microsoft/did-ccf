@@ -26,12 +26,20 @@ export class AuthenticatedIdentity {
   public policy: string;
 
   /**
+   * The COSE body of the authenticated identity.
+   */
+  public coseBody: string | undefined;
+
+  /**
    * Constructs a new instance of the {@link AuthenticatedIdentity} class.
    * @param {AuthnIdentity} identity provided in request and matched by CCF.
    */
   constructor (public identity: AuthnIdentity) {
     this.identifier = identity ? AuthenticatedIdentity.getAuthenticatedIdentityIdentifier(identity) : UNAUTHENTICATED;
     this.policy = identity?.policy || 'no_auth';
+    if (this.policy === 'user_cose_sign1' && (<UserCOSESign1AuthnIdentity>identity).cose.content.byteLength > 0) {
+      this.coseBody = String.fromCharCode.apply(null, (new Uint8Array((<UserCOSESign1AuthnIdentity>identity).cose.content)));
+    }
   }
 
   /**
