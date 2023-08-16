@@ -4,7 +4,6 @@ import {
   AuthnIdentity,
   JwtAuthnIdentity,
   MemberCertAuthnIdentity,
-  MemberCOSESign1AuthnIdentity,
   UserCertAuthnIdentity,
   UserCOSESign1AuthnIdentity,
 } from '@microsoft/ccf-app';
