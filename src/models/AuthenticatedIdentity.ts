@@ -3,8 +3,6 @@
 import {
   AuthnIdentity,
   JwtAuthnIdentity,
-  MemberCertAuthnIdentity,
-  UserCertAuthnIdentity,
   UserCOSESign1AuthnIdentity,
 } from '@microsoft/ccf-app';
 
@@ -63,10 +61,6 @@ export class AuthenticatedIdentity {
     switch (identity.policy) {
       case 'jwt':
         return (<JwtAuthnIdentity>identity).jwt.keyIssuer;
-      case 'member_cert':
-        return (<MemberCertAuthnIdentity>identity).id;
-      case 'user_cert':
-        return (<UserCertAuthnIdentity>identity).id;
       case 'user_cose_sign1':
         return (<UserCOSESign1AuthnIdentity>identity).id;
       default:
