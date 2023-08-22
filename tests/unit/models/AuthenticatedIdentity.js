@@ -60,8 +60,6 @@ describe ('AuthenticatedIdentity', () => {
         const coseString = "Cose";
         const coseBuffer = Uint8Array.from(coseString.split('').map(letter => letter.charCodeAt(0)));
 
-        console.log(coseBuffer.buffer);
-
         const authnIdentity = {
             policy: "user_cose_sign1",
             id: "user_cose_sign1_id",  
