@@ -54,24 +54,4 @@ describe ('AuthenticatedIdentity', () => {
         expect(authenticatedIdentity.policy).to.equal('user_cose_sign1');
         expect(authenticatedIdentity.identifier).to.equal('user_cose_sign1_id');
     });
-
-    
-    it ('should construct a new instance for `user_cose_sign1` policy with cose body.', () => {
-        const coseString = "Cose";
-        const coseBuffer = Uint8Array.from(coseString.split('').map(letter => letter.charCodeAt(0)));
-
-        const authnIdentity = {
-            policy: "user_cose_sign1",
-            id: "user_cose_sign1_id",  
-            cose: {
-                content: coseBuffer.buffer
-            }
-        };
-
-        const authenticatedIdentity = new AuthenticatedIdentity(authnIdentity);
-        expect(authenticatedIdentity).not.null;
-        expect(authenticatedIdentity.policy).to.equal('user_cose_sign1');
-        expect(authenticatedIdentity.identifier).to.equal('user_cose_sign1_id');
-        expect(authenticatedIdentity.coseBody).to.equal(coseString);
-    });
 })

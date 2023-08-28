@@ -13,6 +13,7 @@ import {
   IdentifierStore,
   RequestContext,
 } from '../../../models';
+import { AuthenticatedRequest } from '../../../models/AuthenticatedRequest';
 import { Service } from '../../../models/Service';
 
 /**
@@ -21,7 +22,8 @@ import { Service } from '../../../models/Service';
  */
 export function add (request: Request): Response {
   // Get the authentication details of the caller
-  const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
+  const authenticatedRequest = new AuthenticatedRequest(request);
+  const authenticatedIdentity = authenticatedRequest.authenticatedIdentity;
   const context = new RequestContext(request);
   const identifierId: string = context.identifier;
 
@@ -35,12 +37,7 @@ export function add (request: Request): Response {
 
   // Get the service JSON from the request and check that
   // is correctly formed.
-  let service : Service;
-  if (authenticatedIdentity.policy === 'user_cose_sign1') {
-    service = JSON.parse(authenticatedIdentity.coseBody);
-  } else {
-    service = request.body.json();
-  }
+  const service  = <Service>authenticatedRequest.jsonBody;
 
   if (!service) {
     const serviceNotProvided = new ServiceNotProvided(authenticatedIdentity);

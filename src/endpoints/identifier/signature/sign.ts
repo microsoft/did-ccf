@@ -27,6 +27,7 @@ import {
     RequestContext,
     SignedPayload,
 } from '../../../models';
+import { AuthenticatedRequest } from '../../../models/AuthenticatedRequest';
 
 /**
  * Signs the payload using the current signing key associated with the controller identifier.
@@ -35,7 +36,8 @@ import {
  */
 export function sign (request: Request): Response<any> {
   // Get the authentication details of the caller
-  const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
+  const authenticatedRequest = new AuthenticatedRequest(request);
+  const authenticatedIdentity = authenticatedRequest.authenticatedIdentity;
   const context = new RequestContext(request);
   const identifierId = context.identifier;
 
@@ -49,12 +51,7 @@ export function sign (request: Request): Response<any> {
 
   // Read the text from the request and validate
   // before we do any work retrieving keys.
-  let payload : string;
-  if (authenticatedIdentity.policy === 'user_cose_sign1') {
-    payload = authenticatedIdentity.coseBody;
-  } else {
-    payload = request.body.text();
-  }
+  const payload = authenticatedRequest.textBody;
 
   if (!payload || payload.length === 0) {
     const payloadNotProvided = new PayloadNotProvided(authenticatedIdentity);

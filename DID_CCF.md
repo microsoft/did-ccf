@@ -1,6 +1,6 @@
 # did:ccf Method Specification
 
-**Authors**: Brandon Murdoch, Eddy Ashton, Amaury Chamayou, Sylvan Clebsch, Stephen Higgins, Adam Duff
+**Authors**: Brandon Murdoch, Eddy Ashton, Amaury Chamayou, Sylvan Clebsch, Stephen Higgins, Adam Duff  
 **Latest version**: https://github.com/microsoft/did-ccf/blob/main/did-ccf.md  
 **Status**: Working Draft  
 
