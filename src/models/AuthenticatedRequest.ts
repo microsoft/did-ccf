@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the Apache 2.0 License.
 import {
-  AuthnIdentity, Body, Request, UserCOSESign1AuthnIdentity,
+  Body, Request, UserCOSESign1AuthnIdentity,
 } from '@microsoft/ccf-app';
 import { AuthenticatedIdentity } from './AuthenticatedIdentity';
 
 /**
- * Class for wrapping the CCF {@link AuthnIdentity} class.
+ * Class for obtaining the Authenticated Request using the AuthenticatedIdentity policy
+ * and the relevant request body for said policy.
  */
 export class AuthenticatedRequest {
   /**

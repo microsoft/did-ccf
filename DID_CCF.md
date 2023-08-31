@@ -121,10 +121,21 @@ De-registering a domain does _not_ invalidate DIDs previously created in the dom
 
 ## DID Operations
 
+### Note on COSE Authorized requests for DID Operations
+
+It is possible to use the ccf_cose_sign1 package for creating the data-binary which is required in the COSE requests. This would look like the following where the ccf-gove-msg-type, ccf-gov-msg-created_at and content are all required parameters for ccf_cose_sign1 but not required for did:ccf and do not affect the request.
+
+```sh
+ccf_cose_sign1 --ccf-gov-msg-type ack --ccf-gov-msg-created_at `date -Is` --signing-key diddevccfpkey.pem --signing-cert diddevccfcert.pem --content fakeFile.json | 
+```
+
+For full information on COSE Authorization the spec is available at: [CBOR Object Signing and Encryption (COSE)](https://www.rfc-editor.org/rfc/rfc8152)
+
 ### Create (Private API)
 All authenticated members of a consortium and registered users of a given CCF network can create new decentralized identifiers by calling the **identifiers/create** endpoint. This API generates a cryptographic key pair and DID Document which is stored in the members confidential computing enclave.
 
 The endpoints would be used as follows where the data-binary is the buffer/byte array of the signed cose of an empty payload. Alternativly JWTs could be used, for examples see [JWT Authentication CCF Documentation](https://microsoft.github.io/CCF/main/build_apps/auth/jwt.html).
+
 ```sh
 curl https://<host>/app/identifiers/create --cacert <service_certificate>.pem --data-binary @- -H "content-type: application/cose" -X POST
 
