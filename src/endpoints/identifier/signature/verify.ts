@@ -28,6 +28,7 @@ import {
     RequestContext,
     SignedPayload,
 } from '../../../models';
+import { AuthenticatedRequest } from '../../../models/AuthenticatedRequest';
 
 /**
  * Verifies the signature for the specified payload.
@@ -36,7 +37,8 @@ import {
  */
 export function verify (request: Request): Response<any> {
   // Get the authentication details of the caller
-  const authenticatedIdentity = new AuthenticatedIdentity(request.caller);
+  const authenticatedRequest = new AuthenticatedRequest(request);
+  const authenticatedIdentity = authenticatedRequest.authenticatedIdentity;
   const context = new RequestContext(request);
   const identifierId = context.identifier;
 
@@ -51,7 +53,8 @@ export function verify (request: Request): Response<any> {
   // Get the signature and payload from
   // the body JSON and validate before we do any
   // real work.
-  const bodyJson = <SignedPayload>request.body.json();
+  const bodyJson = <SignedPayload>authenticatedRequest.jsonBody;
+
   const signatureBase64 = bodyJson.signature;
   const payload = bodyJson.payload;
   const signerIdentifier = bodyJson.signer;

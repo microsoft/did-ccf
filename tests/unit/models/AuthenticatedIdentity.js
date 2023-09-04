@@ -40,51 +40,18 @@ describe ('AuthenticatedIdentity', () => {
         expect(authenticatedIdentity.identifier).to.equal('issuer');
     });
 
-    it ('should construct a new instance for `member_cert` policy.', () => {
+    it ('should construct a new instance for `user_cose_sign1` policy with empty body.', () => {
         const authnIdentity = {
-            policy: "member_cert",
-            id: "member_cert_id"  
+            policy: "user_cose_sign1",
+            id: "user_cose_sign1_id",  
+            cose: {
+                content: {}
+            }
         };
 
         const authenticatedIdentity = new AuthenticatedIdentity(authnIdentity);
         expect(authenticatedIdentity).not.null;
-        expect(authenticatedIdentity.policy).to.equal('member_cert');
-        expect(authenticatedIdentity.identifier).to.equal('member_cert_id');
-    });
-
-    it ('should construct a new instance for `member_signature` policy.', () => {
-        const authnIdentity = {
-            policy: "member_signature",
-            id: "member_signature_id"  
-        };
-
-        const authenticatedIdentity = new AuthenticatedIdentity(authnIdentity);
-        expect(authenticatedIdentity).not.null;
-        expect(authenticatedIdentity.policy).to.equal('member_signature');
-        expect(authenticatedIdentity.identifier).to.equal('member_signature_id');
-    });
-
-    it ('should construct a new instance for `user_cert` policy.', () => {
-        const authnIdentity = {
-            policy: "user_cert",
-            id: "user_cert_id"  
-        };
-
-        const authenticatedIdentity = new AuthenticatedIdentity(authnIdentity);
-        expect(authenticatedIdentity).not.null;
-        expect(authenticatedIdentity.policy).to.equal('user_cert');
-        expect(authenticatedIdentity.identifier).to.equal('user_cert_id');
-    });
-
-    it ('should construct a new instance for `user_signature` policy.', () => {
-        const authnIdentity = {
-            policy: "user_signature",
-            id: "user_signature_id"  
-        };
-
-        const authenticatedIdentity = new AuthenticatedIdentity(authnIdentity);
-        expect(authenticatedIdentity).not.null;
-        expect(authenticatedIdentity.policy).to.equal('user_signature');
-        expect(authenticatedIdentity.identifier).to.equal('user_signature_id');
+        expect(authenticatedIdentity.policy).to.equal('user_cose_sign1');
+        expect(authenticatedIdentity.identifier).to.equal('user_cose_sign1_id');
     });
 })

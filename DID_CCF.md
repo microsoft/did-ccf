@@ -1,6 +1,6 @@
 # did:ccf Method Specification
 
-**Authors**: Brandon Murdoch, Eddy Ashton, Amaury Chamayou, Sylvan Clebsch, Stephen Higgins
+**Authors**: Brandon Murdoch, Eddy Ashton, Amaury Chamayou, Sylvan Clebsch, Stephen Higgins, Adam Duff  
 **Latest version**: https://github.com/microsoft/did-ccf/blob/main/did-ccf.md  
 **Status**: Working Draft  
 
@@ -61,7 +61,8 @@ To invoke this action, typically one member will propose the invocation and - de
 
 #### Proposal
 ```sh
-./scurl.sh https://<host>/gov/proposals --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> --data-binary @add_did_domain.json -H "content-type: application/json"
+ccf_cose_sign1 --ccf-gov-msg-type proposal --ccf-gov-msg-created_at `date -Is` --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> --content add_member.json | \
+curl https://<ccf-node-address>/gov/proposals --cacert service_cert.pem --data-binary @- -H "content-type: application/cose"
 ```
 ##### add_did_domain.json
 ```json
@@ -100,7 +101,8 @@ Members of a consortium can de-register a previously-registered domain by removi
 ```
 #### Proposal
 ```sh
-./scurl.sh https://<host>/gov/proposals --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> --data-binary @remove_did_domain.json -H "content-type: application/json"
+ccf_cose_sign1 --ccf-gov-msg-type proposal --ccf-gov-msg-created_at `date -Is` --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> --content remove_did_domain.json | \
+curl https://<ccf-node-address>/gov/proposals --cacert service_cert.pem --data-binary @- -H "content-type: application/cose"
 ```
 ##### remove_did_domain.json
 ```json
@@ -119,13 +121,25 @@ De-registering a domain does _not_ invalidate DIDs previously created in the dom
 
 ## DID Operations
 
+### Note on COSE Authorized requests for DID Operations
+
+It is possible to use the ccf_cose_sign1 package for creating the data-binary which is required in the COSE requests. This would look like the following where the ccf-gove-msg-type, ccf-gov-msg-created_at and content are all required parameters for ccf_cose_sign1 but not required for did:ccf and do not affect the request.
+
+```sh
+ccf_cose_sign1 --ccf-gov-msg-type ack --ccf-gov-msg-created_at `date -Is` --signing-key diddevccfpkey.pem --signing-cert diddevccfcert.pem --content fakeFile.json | 
+```
+
+For full information on COSE Authorization the spec is available at: [CBOR Object Signing and Encryption (COSE)](https://www.rfc-editor.org/rfc/rfc8152)
+
 ### Create (Private API)
 All authenticated members of a consortium and registered users of a given CCF network can create new decentralized identifiers by calling the **identifiers/create** endpoint. This API generates a cryptographic key pair and DID Document which is stored in the members confidential computing enclave.
 
-```
-./scurl.sh https://<host>/app/identifiers/create --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> -H "content-type: application/json" -X POST
+The endpoints would be used as follows where the data-binary is the buffer/byte array of the signed cose of an empty payload. Alternativly JWTs could be used, for examples see [JWT Authentication CCF Documentation](https://microsoft.github.io/CCF/main/build_apps/auth/jwt.html).
 
-./scurl.sh https://<host>/app/identifiers/create?alg=ECDSA'&'curve=secp256k1 --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> -H "content-type: application/json" -X
+```sh
+curl https://<host>/app/identifiers/create --cacert <service_certificate>.pem --data-binary @- -H "content-type: application/cose" -X POST
+
+curl https://<host>/app/identifiers/create?alg=ECDSA'&'curve=secp256k1 --cacert <service_certificate>.pem ---data-binary @- -H "content-type: application/cose" -X POST
 ```
 
 Supported key algorithms (alg):
@@ -192,16 +206,16 @@ Supported ECDSA curves (curve):
 - secp384r1
 
 ```
-./scurl.sh https://<host>/app/identifiers/<did>/keys/roll --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> -H "content-type: application/json" -X PATCH
+./scurl.sh https://<host>/app/identifiers/<did>/keys/roll --cacert <service_certificate>.pem ---data-binary @- -H "content-type: application/cose" -X PATCH
 
-./scurl.sh https://<host>/app/identifiers/<did>/keys/<kid>/revoke --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> -H "content-type: application/json" -X POST
+./scurl.sh https://<host>/app/identifiers/<did>/keys/<kid>/revoke --cacert <service_certificate>.pem ---data-binary @- -H "content-type: application/cose" -X POST
 ```
 
 ### Deactivate
 All authenticated members of a consortium and registered users of a given CCF Network can deactivate an identifier that is under their control by calling the **identifiers/\<did\>/deactivate** endpoint. This API checks that the caller making the request is the owner of the identifier and if true, removes the identifier and all it's associated keys from the network.
 
 ```
-./scurl.sh https://<host>/app/identifiers/<did>/deactivate --cacert <service_certificate>.pem --signing-key <member_private_key.pem> --signing-cert <member_certificate.pem> -H "content-type: application/json" -X PATCH
+./scurl.sh https://<host>/app/identifiers/<did>/deactivate --cacert <service_certificate>.pem ---data-binary @- -H "content-type: application/cose" -X PATCH
 ```
 
 ## Security and Privacy Considerations
